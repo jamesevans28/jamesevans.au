@@ -50,7 +50,7 @@ jobs:
         run: npm run typecheck
 
       - name: Unit tests (with coverage)
-        run: npm test -- --coverage
+        run: npm test
 
       - name: Build (static export)
         run: npm run build
