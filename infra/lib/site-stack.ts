@@ -9,14 +9,20 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets';
 
 export interface SiteStackProps extends cdk.StackProps {
   domainName: string;
+  /** Certificate from the us-east-1 edge stack (CloudFront requires us-east-1). */
+  certificate: acm.ICertificate;
+  /** Hosted zone details from the edge stack, for alias records. */
+  hostedZoneId: string;
+  hostedZoneName: string;
 }
 
 /**
- * Static-site hosting: private S3 origin, CloudFront with Origin Access
- * Control, an ACM cert (this stack is in us-east-1 as CloudFront requires),
- * a Route 53 hosted zone with apex + www alias records, a CloudFront Function
- * that maps extensionless URLs to /index.html and 301-redirects www → apex,
- * and a response-headers policy applying HSTS/CSP and friends.
+ * Main stack — deployed to ap-southeast-2 (Sydney). Everything that can live
+ * in Australia does: the private S3 origin bucket and the CloudFront config.
+ * The ACM certificate is passed in from the us-east-1 edge stack (AWS forces
+ * CloudFront certs into us-east-1); Route 53 and CloudFront are global
+ * services. Cross-region references (enabled in bin/infra.ts) wire the cert
+ * and zone in from the edge stack.
  */
 export class SiteStack extends cdk.Stack {
   public readonly bucketArn: string;
@@ -25,19 +31,15 @@ export class SiteStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: SiteStackProps) {
     super(scope, id, props);
 
-    const { domainName } = props;
+    const { domainName, certificate, hostedZoneId, hostedZoneName } = props;
     const wwwName = `www.${domainName}`;
 
-    // Hosted zone: created here. After deploy, set the four NS records at
-    // GoDaddy (see infra/README.md). Registration stays with GoDaddy.
-    const zone = new route53.PublicHostedZone(this, 'Zone', {
-      zoneName: domainName,
+    const zone = route53.HostedZone.fromHostedZoneAttributes(this, 'Zone', {
+      hostedZoneId,
+      zoneName: hostedZoneName,
     });
 
-    // Private origin bucket. Co-located with this stack (us-east-1): for a
-    // CloudFront-fronted static site the origin is hit rarely (edge caches
-    // serve almost everything), so origin region is not meaningful and
-    // co-locating avoids cross-region-reference complexity.
+    // Private origin bucket, in this stack's region (ap-southeast-2 / Sydney).
     const bucket = new s3.Bucket(this, 'SiteBucket', {
       bucketName: `${domainName}-site`,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -45,13 +47,6 @@ export class SiteStack extends cdk.Stack {
       enforceSSL: true,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       versioned: true,
-    });
-
-    // ACM certificate (must be us-east-1 for CloudFront) — DNS validated.
-    const certificate = new acm.Certificate(this, 'Certificate', {
-      domainName,
-      subjectAlternativeNames: [wwwName],
-      validation: acm.CertificateValidation.fromDns(zone),
     });
 
     // CloudFront Function: rewrite directory URLs to /index.html and
@@ -199,10 +194,6 @@ function handler(event) {
     });
     new cdk.CfnOutput(this, 'DistributionDomain', {
       value: distribution.distributionDomainName,
-    });
-    new cdk.CfnOutput(this, 'NameServers', {
-      value: cdk.Fn.join(', ', zone.hostedZoneNameServers ?? []),
-      description: 'Set these four NS records at GoDaddy',
     });
   }
 }

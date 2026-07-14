@@ -245,6 +245,7 @@ CloudFront distribution ── ACM cert (us-east-1, apex + www, DNS-validated)
 S3 bucket (private, ap-southeast-2)  ← `out/` from next build
 ```
 
+- **Region split**: implemented as two CDK stacks — an us-east-1 *edge* stack (ACM cert + hosted zone; CloudFront forces the cert into us-east-1) and an ap-southeast-2 *site* stack (S3 + CloudFront + DNS records + deploy role), wired with `crossRegionReferences`. Everything AWS permits sits in the Sydney region; only the cert is out, unavoidably. Phase 6 Lambda/SES will also be ap-southeast-2.
 - **DNS**: create the hosted zone, then set Route 53's four NS at GoDaddy (domain stays registered there). Nothing .au-specific blocks this; James already meets the auDA Australian-presence requirement.
 - **Cache strategy**: `_next/static/*` → `public,max-age=31536000,immutable`; HTML → `max-age=0,must-revalidate`; invalidation `/*` on deploy (free tier: 1,000 paths/mo — fine).
 - **Cost**: ≈ US$1–3/month (hosted zone $0.50 + cents of S3/CloudFront at personal-site traffic) + domain renewal at GoDaddy.

@@ -4,23 +4,31 @@ AWS CDK (TypeScript) for hosting the static site: private **S3** origin →
 **CloudFront** (Origin Access Control) → **ACM** cert → **Route 53** DNS, plus
 an **OIDC deploy role** for GitHub Actions.
 
-The whole stack is in **us-east-1** because CloudFront requires its ACM
-certificate there. The S3 origin is co-located — behind a global CDN the
-origin region is immaterial, and this avoids cross-region complexity.
+**Region strategy — as much in Australia as AWS allows.** The S3 origin,
+CloudFront config, DNS alias records, and the deploy role are all in
+**ap-southeast-2 (Sydney)**. The **only** thing outside Australia is the ACM
+certificate, which CloudFront *requires* in **us-east-1** — that constraint is
+AWS's, not a choice. Route 53 and CloudFront are global services. The two
+stacks are wired with CDK cross-region references.
+
+> Phase 6 note: when the contact-form backend is added, its Lambda + SES also
+> deploy to ap-southeast-2, keeping all compute and storage in Australia.
 
 ## Stacks
 
-| Stack | What it creates |
-|-------|-----------------|
-| `JamesEvansSite` | S3 bucket, CloudFront distribution + OAC, security-headers policy, URL-rewrite/www-redirect CloudFront Function, ACM cert, Route 53 hosted zone, apex + www alias records |
-| `JamesEvansDeployRole` | IAM role assumed by GitHub Actions via OIDC, locked to `repo:<owner>/jamesevans.au:ref:refs/heads/main`, scoped to the bucket + CloudFront invalidation |
+| Stack | Region | What it creates |
+|-------|--------|-----------------|
+| `JamesEvansEdge` | us-east-1 | ACM certificate (CloudFront-required region) + Route 53 hosted zone |
+| `JamesEvansSite` | ap-southeast-2 | S3 bucket, CloudFront + OAC, security-headers policy, URL-rewrite/www-redirect Function, apex + www alias records |
+| `JamesEvansDeployRole` | ap-southeast-2 | IAM role assumed by GitHub Actions via OIDC, locked to `repo:<owner>/jamesevans.au:ref:refs/heads/main`, scoped to the bucket + CloudFront invalidation |
 
 ## Prerequisites
 
 - Node 22+, AWS credentials for the target account (`aws sso login` or env vars)
-- One-time CDK bootstrap of us-east-1:
+- One-time CDK bootstrap of **both** regions the stacks use:
   ```bash
   npx cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
+  npx cdk bootstrap aws://<ACCOUNT_ID>/ap-southeast-2
   ```
 
 ## Deploy — first time
@@ -29,8 +37,9 @@ origin region is immaterial, and this avoids cross-region complexity.
 cd infra
 npm install
 
-# 1. Deploy the site stack (creates the hosted zone + requests the cert).
-npx cdk deploy JamesEvansSite
+# 1. Deploy the edge + site stacks. cdk resolves the dependency order
+#    (edge first: it creates the hosted zone + cert the site stack consumes).
+npx cdk deploy JamesEvansEdge JamesEvansSite
 ```
 
 The deploy will **pause on certificate validation** until DNS resolves. Do the
@@ -38,7 +47,7 @@ GoDaddy delegation now:
 
 ### GoDaddy → Route 53 delegation
 
-1. In the `JamesEvansSite` outputs (or the Route 53 console) copy the **four
+1. In the `JamesEvansEdge` outputs (or the Route 53 console) copy the **four
    `NameServers`** for the new hosted zone.
 2. In GoDaddy: **Domain Settings → Nameservers → Change → Enter my own
    nameservers**, and paste all four. (Registration stays at GoDaddy; only DNS
@@ -63,8 +72,8 @@ auth:
 
 | Variable | Source output |
 |----------|---------------|
-| `AWS_DEPLOY_ROLE_ARN` | `DeployRoleArn` |
-| `AWS_REGION` | `us-east-1` (`BucketRegionOut`) |
+| `AWS_DEPLOY_ROLE_ARN` | `DeployRoleArn` (JamesEvansDeployRole) |
+| `AWS_REGION` | `ap-southeast-2` (`BucketRegionOut`) |
 | `SITE_BUCKET` | `BucketName` |
 | `CLOUDFRONT_DISTRIBUTION_ID` | `DistributionId` |
 
