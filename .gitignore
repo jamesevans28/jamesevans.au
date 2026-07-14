@@ -137,3 +137,9 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# CDK build output
+infra/cdk.out/
+infra/*.d.ts
+infra/*.js
+!infra/jest.config.js

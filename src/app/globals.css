@@ -1,0 +1,136 @@
+@import 'tailwindcss';
+
+/* Dark mode driven by a `data-theme` attribute on <html>, with the system
+   preference as the default. The variant below lets `dark:` utilities work. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ------------------------------------------------------------------ *
+ * Voltage design tokens
+ * Saturated colour on clean grounds. Colour encodes meaning — brand
+ * (volt), action (flare), highlight (citrus) — never decoration.
+ * Every text/background pair is AA-contrast checked in a unit test
+ * (see src/lib/contrast.test.ts).
+ * ------------------------------------------------------------------ */
+@theme {
+  --font-display:
+    var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+  /* Light theme (default). Redefined for dark below. */
+  --color-paper: #ffffff;
+  --color-surface: #f4f5fb;
+  --color-ink: #0e0e1a;
+  --color-ink-muted: #4e4e66;
+  --color-volt: #2337ff;
+  --color-volt-deep: #1723b8;
+  --color-flare: #ff4d2e;
+  --color-citrus: #ffc400;
+  --color-line: #e3e5f0;
+
+  /* Text on flare/citrus fills — fixed near-black in BOTH themes (AA-safe). */
+  --color-on-accent: #0c0c18;
+
+  --radius-card: 0.625rem;
+}
+
+/* System-preference dark mode (before any manual toggle) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-paper: #0c0c18;
+    --color-surface: #16162b;
+    --color-ink: #f2f2fa;
+    --color-ink-muted: #9c9cb8;
+    --color-volt: #7c89ff;
+    --color-volt-deep: #2a2a45;
+    --color-flare: #ff7a5c;
+    --color-citrus: #ffd23f;
+    --color-line: #2a2a45;
+  }
+}
+
+/* Manual dark toggle wins in both directions */
+:root[data-theme='dark'] {
+  --color-paper: #0c0c18;
+  --color-surface: #16162b;
+  --color-ink: #f2f2fa;
+  --color-ink-muted: #9c9cb8;
+  --color-volt: #7c89ff;
+  --color-volt-deep: #2a2a45;
+  --color-flare: #ff7a5c;
+  --color-citrus: #ffd23f;
+  --color-line: #2a2a45;
+}
+
+:root[data-theme='light'] {
+  --color-paper: #ffffff;
+  --color-surface: #f4f5fb;
+  --color-ink: #0e0e1a;
+  --color-ink-muted: #4e4e66;
+  --color-volt: #2337ff;
+  --color-volt-deep: #1723b8;
+  --color-flare: #ff4d2e;
+  --color-citrus: #ffc400;
+  --color-line: #e3e5f0;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-paper);
+    color-scheme: light dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    line-height: 1.06;
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-volt);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-citrus);
+    color: #0e0e1a;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Utility: citrus marker highlight on key phrases */
+@utility mark-citrus {
+  background-color: var(--color-citrus);
+  color: var(--color-on-accent);
+  padding: 0 0.18em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
