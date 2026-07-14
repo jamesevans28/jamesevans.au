@@ -8,6 +8,7 @@ export default tseslint.config(
     ignores: [
       '.next/**',
       'out/**',
+      'coverage/**',
       'node_modules/**',
       'infra/**',
       'next-env.d.ts',

@@ -29,7 +29,7 @@ describe('JSON-LD builders', () => {
     expect(s['@type']).toBe('ProfessionalService');
     expect(s.areaServed.name).toBe('Australia');
     expect(s.hasOfferCatalog.itemListElement.length).toBe(4);
-    expect(s.hasOfferCatalog.itemListElement[0]['@type']).toBe('Offer');
+    expect(s.hasOfferCatalog.itemListElement[0]?.['@type']).toBe('Offer');
   });
 
   it('omits ABN identifier while none is set', () => {

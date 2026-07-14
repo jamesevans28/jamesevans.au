@@ -13,13 +13,10 @@ describe('ThemeScript', () => {
 });
 
 describe('Analytics', () => {
-  const original = process.env.NODE_ENV;
-  const originalGa = process.env.NEXT_PUBLIC_GA_ID;
-
   afterEach(() => {
+    // vi.stubEnv snapshots and restores env safely (NODE_ENV is read-only
+    // in the types, so direct assignment would not typecheck).
     vi.unstubAllEnvs();
-    process.env.NODE_ENV = original;
-    process.env.NEXT_PUBLIC_GA_ID = originalGa;
     vi.resetModules();
   });
 
