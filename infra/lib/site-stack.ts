@@ -152,6 +152,15 @@ function handler(event) {
           responsePagePath: '/404.html',
           ttl: cdk.Duration.minutes(5),
         },
+        {
+          // With a private S3 origin behind OAC, a missing key returns 403
+          // (AccessDenied), not 404 — so map 403 to the branded 404 page too,
+          // and normalise the status to 404 for correctness.
+          httpStatus: 403,
+          responseHttpStatus: 404,
+          responsePagePath: '/404.html',
+          ttl: cdk.Duration.minutes(5),
+        },
       ],
     });
 
