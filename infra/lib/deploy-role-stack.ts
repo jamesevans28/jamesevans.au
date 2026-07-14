@@ -42,8 +42,10 @@ export class DeployRoleStack extends cdk.Stack {
           'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
         },
         StringLike: {
-          // Lock to this repo + main branch only.
-          'token.actions.githubusercontent.com:sub': `repo:${githubRepo}:ref:refs/heads/main`,
+          // The deploy job targets the `production` GitHub Environment, so
+          // GitHub sets the token sub to `...:environment:production` (NOT
+          // `...:ref:refs/heads/main`). Lock to this repo + that environment.
+          'token.actions.githubusercontent.com:sub': `repo:${githubRepo}:environment:production`,
         },
       }),
     });
