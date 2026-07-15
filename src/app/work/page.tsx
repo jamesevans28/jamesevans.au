@@ -7,7 +7,7 @@ import { SparkField } from '@/components/SparkField';
 export const metadata: Metadata = {
   title: 'Work',
   description:
-    'Case studies from 25 years of shipping software — Audify (a field-auditing platform built for Kairos Strategies), Point of Sale at national scale, a 50-robot CRM migration, and more.',
+    'Case studies from 25 years of shipping software: Audify (a field-auditing platform built for Kairos Strategies), Point of Sale at national scale, a 50-robot CRM migration, and more.',
   alternates: { canonical: '/work/' },
 };
 
@@ -24,7 +24,7 @@ export default function WorkPage() {
             Problems, and how I solved them.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">
-            A cross-section of the work — real products and real outcomes, from
+            A cross-section of the work: real products and real outcomes, from
             a national retail system to an app I built from scratch and still
             run today.
           </p>

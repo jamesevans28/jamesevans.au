@@ -5,7 +5,7 @@ import { SparkField } from '@/components/SparkField';
 
 export const metadata: Metadata = {
   title: 'Contact',
-  description: `Get in touch with James Evans — email ${site.email} or connect on LinkedIn. Melbourne-based, available remotely across Australia.`,
+  description: `Get in touch with James Evans. Email ${site.email} or connect on LinkedIn. Melbourne-based, available remotely across Australia.`,
   alternates: { canonical: '/contact/' },
 };
 
@@ -22,7 +22,7 @@ export default function ContactPage() {
             Let us talk about your project.
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-ink-muted">
-            The best way to reach me is email — tell me a little about what you
+            The best way to reach me is email. Tell me a little about what you
             need and I will get back to you. No call centre, no bots; you will
             be talking to me.
           </p>

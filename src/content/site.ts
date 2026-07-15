@@ -7,18 +7,18 @@ export const site = {
   name: 'James Evans',
   domain: 'jamesevans.au',
   url: 'https://jamesevans.au',
-  // Trading as James Evans (personal name). ABN pending — add when issued.
+  // Trading as James Evans (personal name). ABN pending; add when issued.
   tradingName: 'James Evans',
   abn: null as string | null,
   location: 'Melbourne, Australia',
-  // Domain email via forwarding — the personal Gmail is never published.
+  // Domain email via forwarding; the personal Gmail is never published.
   email: 'hello@jamesevans.au',
   linkedin: 'https://www.linkedin.com/in/-jamesevans/',
   tagline: 'Twenty-five years of making technology work.',
   intro:
-    "By day I lead the engineering behind Australia Post's Point of Sale in around 4,000 stores. Beyond it, I build apps, untangle problems and give straight answers — for businesses and people who need tech done right.",
+    "By day I lead the engineering behind Australia Post's Point of Sale in around 4,000 stores. Beyond it I build apps, bring AI into everyday work, and give straight answers to businesses and people who need tech done right.",
   description:
-    'James Evans — Melbourne software engineering leader with 25 years of experience. Custom web and mobile apps, technology consulting, and hands-on tech help for businesses and individuals.',
+    'James Evans is a Melbourne software engineering leader with 25 years of experience. Custom web and mobile apps, AI adoption, technology consulting, and hands-on tech help for businesses and individuals.',
 } as const;
 
 export const navLinks = [

@@ -14,7 +14,7 @@ export default function NotFound() {
           This page took a wrong turn.
         </h1>
         <p className="mt-3 max-w-md text-ink-muted">
-          The page you are after does not exist — it may have moved, or the link
+          The page you are after does not exist. It may have moved, or the link
           might be off. Let us get you back on track.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">

@@ -15,7 +15,7 @@ import { Duotone } from '@/components/Duotone';
 export const metadata: Metadata = {
   title: 'Experience',
   description:
-    "James Evans's career — Engineering Manager at Australia Post, engineering leadership at Telstra, and 25 years across software engineering roles in Australia, New Zealand and the UK.",
+    "James Evans's career: Engineering Manager at Australia Post, engineering leadership at Telstra, and 25 years across software engineering roles in Australia, New Zealand and the UK.",
   alternates: { canonical: '/experience/' },
 };
 

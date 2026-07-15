@@ -23,5 +23,5 @@ export function formatMonth(value: string): string {
 }
 
 export function formatRange(start: string, end: string): string {
-  return `${formatMonth(start)} — ${formatMonth(end)}`;
+  return `${formatMonth(start)} to ${formatMonth(end)}`;
 }

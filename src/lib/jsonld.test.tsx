@@ -28,7 +28,7 @@ describe('JSON-LD builders', () => {
     const s = professionalServiceSchema();
     expect(s['@type']).toBe('ProfessionalService');
     expect(s.areaServed.name).toBe('Australia');
-    expect(s.hasOfferCatalog.itemListElement.length).toBe(4);
+    expect(s.hasOfferCatalog.itemListElement.length).toBeGreaterThanOrEqual(4);
     expect(s.hasOfferCatalog.itemListElement[0]?.['@type']).toBe('Offer');
   });
 

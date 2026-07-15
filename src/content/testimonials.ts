@@ -1,7 +1,7 @@
 /**
- * ⚠️ PLACEHOLDER TESTIMONIALS — NOT REAL QUOTES.
+ * ⚠️ PLACEHOLDER TESTIMONIALS, NOT REAL QUOTES.
  * These exist so layout and tone are right. They MUST be replaced with real,
- * permissioned quotes — or the section removed — before launch. Fabricated
+ * permissioned quotes (or the section removed) before launch. Fabricated
  * testimonials cannot go live. Each is flagged `placeholder: true`; the
  * testimonials section renders a visible notice while any remain.
  */
@@ -23,9 +23,16 @@ export const testimonials: Testimonial[] = [
   },
   {
     quote:
-      'He sorted out our systems in a weekend — then explained everything in plain English.',
+      'He sorted out our systems in a weekend, then explained everything in plain English.',
     name: 'Small-business owner',
     title: 'Melbourne',
+    placeholder: true,
+  },
+  {
+    quote:
+      'James showed our team how to actually use AI day to day. It stuck, because he kept it practical.',
+    name: 'Operations lead',
+    title: 'Professional services',
     placeholder: true,
   },
   {

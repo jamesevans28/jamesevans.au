@@ -7,6 +7,7 @@ import { SparkField } from './SparkField';
 import { Section, SectionHeading, Eyebrow } from './Section';
 import { ServicesGrid } from './ServicesGrid';
 import { caseStudies } from '@/content/work';
+import { services } from '@/content/services';
 import { site } from '@/content/site';
 
 vi.mock('next/link', () => ({
@@ -140,18 +141,21 @@ describe('Section', () => {
 });
 
 describe('ServicesGrid', () => {
-  it('renders all four services with descriptions by default', () => {
+  it('renders every service with descriptions by default', () => {
     render(<ServicesGrid />);
     expect(
       screen.getByRole('heading', { name: 'Software development' }),
     ).toBeInTheDocument();
-    expect(screen.getAllByRole('listitem')).toHaveLength(4);
+    expect(
+      screen.getByRole('heading', { name: 'AI adoption' }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(services.length);
   });
 
   it('links each card to /services/ in teaser mode', () => {
     render(<ServicesGrid teaser />);
     const links = screen.getAllByRole('link');
-    expect(links).toHaveLength(4);
+    expect(links).toHaveLength(services.length);
     for (const link of links) {
       expect(link).toHaveAttribute('href', '/services/');
     }

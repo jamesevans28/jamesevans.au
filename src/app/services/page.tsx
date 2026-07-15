@@ -11,7 +11,7 @@ import { JsonLd, professionalServiceSchema } from '@/lib/jsonld';
 export const metadata: Metadata = {
   title: 'Services',
   description:
-    'Custom software development, technology consulting, tech troubleshooting, and hardware installations — for businesses and individuals in Melbourne and remote.',
+    'AI adoption, custom software development, technology consulting, tech troubleshooting, and hardware installations for businesses and individuals in Melbourne and remote.',
   alternates: { canonical: '/services/' },
 };
 
@@ -29,8 +29,9 @@ export default function ServicesPage() {
             Whatever the technology, I can help.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">
-            Software, advice, everyday tech problems, hardware — the same
-            twenty-five years of experience behind every job, big or small.
+            AI adoption, software, advice, everyday tech problems and hardware,
+            with the same twenty-five years of experience behind every job, big
+            or small.
           </p>
         </Container>
       </section>
@@ -112,7 +113,7 @@ export default function ServicesPage() {
             Tell me what you need.
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-ink-muted">
-            No obligation — just a straight conversation about whether I can
+            No obligation, just a straight conversation about whether I can
             help and what it would take.
           </p>
           <div className="mt-6 flex justify-center">

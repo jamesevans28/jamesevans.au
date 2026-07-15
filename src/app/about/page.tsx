@@ -8,7 +8,7 @@ import { Duotone } from '@/components/Duotone';
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'James Evans — a software engineering leader in Melbourne who still ships code. From New Zealand to London to Melbourne, and the philosophy behind the work.',
+    'James Evans is a software engineering leader in Melbourne who still ships code. From New Zealand to London to Melbourne, and the philosophy behind the work.',
   alternates: { canonical: '/about/' },
 };
 

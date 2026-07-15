@@ -11,8 +11,8 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — Software engineering, apps & tech help in Melbourne`,
-    template: `%s — ${site.name}`,
+    default: `${site.name}: Software engineering, AI adoption and tech help in Melbourne`,
+    template: `%s | ${site.name}`,
   },
   description: site.description,
   alternates: {
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     locale: 'en_AU',
     url: site.url,
     siteName: site.name,
-    title: `${site.name} — Software engineering, apps & tech help`,
+    title: `${site.name}: Software engineering, AI adoption and tech help`,
     description: site.description,
     images: [{ url: '/og.png', width: 1200, height: 630, alt: site.name }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${site.name} — Software engineering, apps & tech help`,
+    title: `${site.name}: Software engineering, AI adoption and tech help`,
     description: site.description,
     images: ['/og.png'],
   },

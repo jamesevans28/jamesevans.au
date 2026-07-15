@@ -71,7 +71,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="What I do"
           title="Technology, done right"
-          intro="From building the app to fixing the laptop — the same rigour, whatever the size of the job."
+          intro="From building the app to fixing the laptop, the same rigour whatever the size of the job."
         />
         <div className="mt-8">
           <ServicesGrid teaser />
@@ -88,7 +88,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="Selected work"
           title="Things I have shipped"
-          intro="A few projects that show the range — from a national retail system to an app I built and still run."
+          intro="A few projects that show the range, from a national retail system to an app I built and still run."
         />
         <ul className="mt-8 grid gap-5 md:grid-cols-2">
           {featuredCaseStudies.map((study) => (
@@ -111,7 +111,7 @@ export default function HomePage() {
         <div className="grid items-center gap-10 md:grid-cols-[1fr_auto]">
           <div className="max-w-xl">
             <h2 className="text-3xl font-extrabold text-ink sm:text-4xl">
-              Got something that needs building — or fixing?
+              Got something that needs building, or fixing?
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-ink-muted">
               Whether it is a whole product or a stubborn tech problem, I am

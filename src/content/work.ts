@@ -30,15 +30,15 @@ export const caseStudies: CaseStudy[] = [
       'React Native / Expo',
       'Firestore',
       'Google Cloud',
+      'AI pipeline',
       'Offline-first',
-      'PWA',
     ],
     problem:
-      'Field auditors need to capture asset and condition data on-site — often on long shifts with no reliable connectivity — and turn it into reporting that national contracts depend on.',
+      'Field auditors need to capture asset and condition data on-site, often on long shifts with no reliable connectivity, and turn it into reporting that national contracts depend on.',
     approach:
       'A multi-tenant platform built from the ground up: an offline-first web app and native iOS/Android apps sharing a Firestore backend on Google Cloud (Australian data residency). A crash-safe photo queue, a custom audit form builder, QR asset lookup, an AI defect-detection pipeline, Excel reporting and multi-environment deployments.',
     outcome:
-      'A production system trusted on national government contracts, capturing hundreds of thousands of asset records — and still maintained and evolved today.',
+      'A production system trusted on national government contracts, capturing hundreds of thousands of asset records, and still maintained and evolved today.',
     metrics: [
       { value: '250k+', label: 'asset records captured' },
       { value: '2', label: 'native platforms + web, one codebase' },
@@ -52,9 +52,9 @@ export const caseStudies: CaseStudy[] = [
     role: 'Engineering Manager, Australia Post',
     tags: ['Retail', 'High availability', 'Team leadership'],
     problem:
-      'A national retailer needs its point-of-sale system to work in every store, every day — with a team that can deliver change safely against that reliability bar.',
+      'A national retailer needs its point-of-sale system to work in every store, every day, with a team that can deliver change safely against that reliability bar.',
     approach:
-      'Leading the engineering team that owns the POS platform across the retail network — balancing delivery cadence, reliability and hands-on technical direction.',
+      'Leading the engineering team that owns the POS platform across the retail network, balancing delivery cadence, reliability and hands-on technical direction, with AI developer tooling adopted across the team.',
     outcome:
       'Point of Sale running across around 4,000 stores, with engineering delivery focused on keeping a business-critical system dependable.',
     metrics: [{ value: '~4,000', label: 'stores' }],
@@ -66,7 +66,7 @@ export const caseStudies: CaseStudy[] = [
     role: 'Senior Software Engineer, Telstra',
     tags: ['Automation', 'OpenSpan', 'Scale'],
     problem:
-      'Two hundred thousand customers had to move between two CRMs — a volume that would cost a fortune and take forever to do by hand.',
+      'Two hundred thousand customers had to move between two CRMs, a volume that would cost a fortune and take forever to do by hand.',
     approach:
       'A front-end automation solution on a fleet of 50 robot machines running 24/7, driving the migration through the existing UIs with OpenSpan (a technology learnt for the project).',
     outcome:
@@ -87,10 +87,10 @@ export const caseStudies: CaseStudy[] = [
     approach:
       'A project tracking and reporting application designed and built from the ground up in PHP, Angular and MySQL, hosted on AWS.',
     outcome:
-      'Over 300 daily users, saving an estimated 1–2 hours per person per week.',
+      'Over 300 daily users, saving an estimated 1 to 2 hours per person per week.',
     metrics: [
       { value: '300+', label: 'daily users' },
-      { value: '1–2 hrs', label: 'saved per person per week' },
+      { value: '1-2 hrs', label: 'saved per person per week' },
     ],
   },
 ];

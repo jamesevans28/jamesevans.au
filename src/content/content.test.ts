@@ -66,10 +66,11 @@ describe('experience integrity', () => {
 });
 
 describe('services integrity', () => {
-  it('has four services with unique slugs', () => {
-    expect(services).toHaveLength(4);
+  it('has services with unique slugs, including AI adoption', () => {
+    expect(services.length).toBeGreaterThanOrEqual(4);
     const slugs = new Set(services.map((s) => s.slug));
-    expect(slugs.size).toBe(4);
+    expect(slugs.size).toBe(services.length);
+    expect(slugs.has('ai-adoption')).toBe(true);
   });
 
   it('every service lists what you get', () => {

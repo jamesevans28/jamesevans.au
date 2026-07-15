@@ -15,7 +15,7 @@ export function Testimonials() {
 
       {hasPlaceholderTestimonials ? (
         <p className="mt-6 inline-block rounded-md border border-line bg-paper px-3 py-1 text-xs font-semibold text-ink-muted">
-          Placeholder copy — real, permissioned quotes to follow before launch.
+          Placeholder copy. Real, permissioned quotes to follow before launch.
         </p>
       ) : null}
 
