@@ -14,11 +14,11 @@ export const site = {
   // Domain email via forwarding; the personal Gmail is never published.
   email: 'hello@jamesevans.au',
   linkedin: 'https://www.linkedin.com/in/-jamesevans/',
-  tagline: 'Twenty-five years of making technology work.',
+  tagline: 'Helping businesses put AI to work.',
   intro:
-    "By day I lead the engineering behind Australia Post's Point of Sale in around 4,000 stores. Beyond it I build apps, bring AI into everyday work, and give straight answers to businesses and people who need tech done right.",
+    "I help businesses adopt AI in a way that actually sticks. Assessing where it pays off, building AI skills that automate real work, and getting Claude, OpenAI or Copilot running for your team. Backed by twenty-five years of engineering, including leading the technology behind Australia Post's Point of Sale in around 4,000 stores.",
   description:
-    'James Evans is a Melbourne software engineering leader with 25 years of experience. Custom web and mobile apps, AI adoption, technology consulting, and hands-on tech help for businesses and individuals.',
+    'James Evans helps Melbourne businesses adopt AI: assessments, workflow automation, and setting up Claude, OpenAI and Microsoft Copilot. Backed by 25 years of software engineering, plus custom apps and hands-on tech help.',
 } as const;
 
 export const navLinks = [
@@ -32,8 +32,8 @@ export const navLinks = [
 export type Stat = { value: string; label: string };
 
 export const stats: Stat[] = [
+  { value: 'Daily', label: 'hands-on with Claude, Copilot and OpenAI' },
   { value: '25 yrs', label: 'in software engineering' },
   { value: '~4,000', label: "stores running my team's Point of Sale" },
-  { value: '150', label: "engineers launched via Telstra's graduate program" },
   { value: '250k+', label: 'assets captured by Audify, built end-to-end' },
 ];

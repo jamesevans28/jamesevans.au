@@ -141,13 +141,10 @@ describe('Section', () => {
 });
 
 describe('ServicesGrid', () => {
-  it('renders every service with descriptions by default', () => {
+  it('renders every supporting service with descriptions by default', () => {
     render(<ServicesGrid />);
     expect(
       screen.getByRole('heading', { name: 'Software development' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: 'AI adoption' }),
     ).toBeInTheDocument();
     expect(screen.getAllByRole('listitem')).toHaveLength(services.length);
   });

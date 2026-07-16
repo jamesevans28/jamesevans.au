@@ -1,5 +1,7 @@
 import { site, stats } from '@/content/site';
+import { aiHeadline, aiIntro, aiOfferings, aiTools } from '@/content/ai';
 import { featuredCaseStudies } from '@/content/work';
+import { Card } from '@/components/Card';
 import { Container } from '@/components/Container';
 import { Section, SectionHeading } from '@/components/Section';
 import { ButtonLink } from '@/components/Button';
@@ -20,20 +22,30 @@ export default function HomePage() {
             {site.name} · {site.location}
           </p>
           <h1 className="mt-4 max-w-4xl text-5xl font-extrabold leading-[1.02] text-ink sm:text-6xl md:text-7xl">
-            Twenty-five years of making{' '}
-            <span className="text-volt">technology work</span>.
+            Helping businesses put{' '}
+            <span className="text-volt">AI to work</span>.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-muted">
             {site.intro}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/services/" variant="primary">
-              Work with me
+              Explore AI services
             </ButtonLink>
-            <ButtonLink href="/experience/" variant="ghost">
-              My experience
+            <ButtonLink href="/contact/" variant="ghost">
+              Book an assessment
             </ButtonLink>
           </div>
+          <ul className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-ink-muted">
+            <li className="text-xs font-bold uppercase tracking-widest text-ink-muted">
+              Working daily in
+            </li>
+            {aiTools.map((tool) => (
+              <li key={tool} className="text-ink">
+                {tool}
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
@@ -66,19 +78,50 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* Services teaser */}
+      {/* AI, front and centre */}
       <Section>
+        <SectionHeading eyebrow="AI adoption" title={aiHeadline} intro={aiIntro} />
+        <ul className="mt-10 grid gap-5 md:grid-cols-3">
+          {aiOfferings.map((offering) => (
+            <li key={offering.slug}>
+              <Card className="flex h-full flex-col gap-3">
+                <h3 className="font-display text-xl font-extrabold text-ink">
+                  {offering.title}
+                </h3>
+                <p className="font-semibold text-volt">{offering.tagline}</p>
+                <p className="text-sm leading-relaxed text-ink-muted">
+                  {offering.description}
+                </p>
+                <p className="mt-auto border-t border-line pt-3 text-sm text-ink">
+                  {offering.outcome}
+                </p>
+              </Card>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <ButtonLink href="/services/" variant="primary">
+            See how AI adoption works
+          </ButtonLink>
+          <ButtonLink href="/contact/" variant="ghost">
+            Book an assessment
+          </ButtonLink>
+        </div>
+      </Section>
+
+      {/* Supporting services */}
+      <Section className="bg-surface">
         <SectionHeading
-          eyebrow="What I do"
-          title="Technology, done right"
-          intro="From building the app to fixing the laptop, the same rigour whatever the size of the job."
+          eyebrow="Beyond AI"
+          title="Twenty-five years of engineering behind it"
+          intro="AI advice lands better coming from someone who still builds the systems. I also do the software, consulting and hands-on tech work that backs it up."
         />
         <div className="mt-8">
           <ServicesGrid teaser />
         </div>
         <div className="mt-8">
           <ButtonLink href="/services/" variant="ghost">
-            Explore services
+            Explore all services
           </ButtonLink>
         </div>
       </Section>

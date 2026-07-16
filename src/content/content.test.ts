@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { navLinks, stats, site } from './site';
 import { roles, currentRole } from './experience';
 import { services } from './services';
+import { aiOfferings, aiTools } from './ai';
 import { caseStudies, featuredCaseStudies } from './work';
 import { testimonials } from './testimonials';
 import { formatMonth, formatRange } from '@/lib/dates';
@@ -66,17 +67,41 @@ describe('experience integrity', () => {
 });
 
 describe('services integrity', () => {
-  it('has services with unique slugs, including AI adoption', () => {
+  it('has supporting services with unique slugs', () => {
     expect(services.length).toBeGreaterThanOrEqual(4);
     const slugs = new Set(services.map((s) => s.slug));
     expect(slugs.size).toBe(services.length);
-    expect(slugs.has('ai-adoption')).toBe(true);
   });
 
   it('every service lists what you get', () => {
     for (const service of services) {
       expect(service.youGet.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('AI offerings integrity', () => {
+  it('has the three headline AI offerings with unique slugs', () => {
+    const slugs = aiOfferings.map((o) => o.slug);
+    expect(new Set(slugs)).toEqual(
+      new Set(['ai-assessment', 'ai-skills', 'ai-systems']),
+    );
+  });
+
+  it('every AI offering has a tagline, what-you-get and an outcome', () => {
+    for (const o of aiOfferings) {
+      expect(o.title.length).toBeGreaterThan(0);
+      expect(o.tagline.length).toBeGreaterThan(0);
+      expect(o.youGet.length).toBeGreaterThan(0);
+      expect(o.outcome.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('lists the common AI platforms as tools', () => {
+    const joined = aiTools.join(' ').toLowerCase();
+    expect(joined).toContain('claude');
+    expect(joined).toContain('openai');
+    expect(joined).toContain('copilot');
   });
 });
 

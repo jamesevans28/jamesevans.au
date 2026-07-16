@@ -1,6 +1,7 @@
 import { site } from '@/content/site';
 import { currentRole, skills } from '@/content/experience';
 import { services } from '@/content/services';
+import { aiOfferings } from '@/content/ai';
 
 /**
  * JSON-LD structured data builders. Returned as plain objects and serialized
@@ -62,10 +63,21 @@ export function professionalServiceSchema() {
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Services',
-      itemListElement: services.map((s) => ({
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: s.title, description: s.tagline },
-      })),
+      itemListElement: [
+        // AI offerings lead the catalog.
+        ...aiOfferings.map((o) => ({
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: o.title,
+            description: o.tagline,
+          },
+        })),
+        ...services.map((s) => ({
+          '@type': 'Offer',
+          itemOffered: { '@type': 'Service', name: s.title, description: s.tagline },
+        })),
+      ],
     },
   };
 }

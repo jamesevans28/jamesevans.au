@@ -11,20 +11,6 @@ export type Service = {
 
 export const services: Service[] = [
   {
-    slug: 'ai-adoption',
-    title: 'AI adoption',
-    tagline: 'Put AI to work in your business, sensibly.',
-    description:
-      'I help teams fold AI into the way they already work, using it every day myself across the tools that matter: Claude, Microsoft 365 Copilot and GitHub Copilot. Practical wins, not hype, with a clear eye on where AI helps and where it does not.',
-    youGet: [
-      'A review of where AI can genuinely save you time',
-      'Hands-on setup of Claude, M365 Copilot and GitHub Copilot',
-      'Workflows, prompts and guardrails your team will actually use',
-    ],
-    forWho:
-      'Businesses and teams that want to adopt AI properly, without the guesswork.',
-  },
-  {
     slug: 'software-development',
     title: 'Software development',
     tagline: 'Web and mobile apps, built end to end.',
