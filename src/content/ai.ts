@@ -7,7 +7,7 @@
 export const aiHeadline = 'Get AI working in your business.';
 
 export const aiIntro =
-  "AI is genuinely useful now, if you know where to point it. I use Claude, Microsoft 365 Copilot and GitHub Copilot every day, at Australia Post and in my own product work, and I help other businesses do the same. Not a demo that impresses once, but tools your team actually reaches for on a Tuesday.";
+  "AI is genuinely useful now, if you know where to point it. I use Claude, Claude Cowork, Microsoft 365 Copilot and GitHub Copilot every day, at Australia Post and in my own product work, and I help other businesses do the same. Not a demo that impresses once, but tools your team actually reaches for on a Tuesday.";
 
 export type AiOffering = {
   slug: string;
@@ -67,4 +67,10 @@ export const aiOfferings: AiOffering[] = [
 ];
 
 /** The tools James works in daily, shown as trust signals. */
-export const aiTools = ['Claude', 'OpenAI', 'Microsoft 365 Copilot', 'GitHub Copilot'];
+export const aiTools = [
+  'Claude',
+  'Claude Cowork',
+  'OpenAI',
+  'Microsoft 365 Copilot',
+  'GitHub Copilot',
+];

@@ -109,7 +109,7 @@ export const earlierRoles = [
 ] as const;
 
 export const skills = [
-  'AI tooling: Claude, M365 Copilot, GitHub Copilot',
+  'AI tooling: Claude, Claude Cowork, M365 Copilot, GitHub Copilot',
   'C# / .NET',
   'TypeScript',
   'JavaScript: React, Vue, Angular',
