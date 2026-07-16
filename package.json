@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "og": "node scripts/generate-og.mjs"
+    "og": "node scripts/generate-og.mjs",
+    "resume": "tsx scripts/generate-resume.mjs"
   },
   "dependencies": {
     "@next/third-parties": "16.2.10",
@@ -38,10 +39,12 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.2.10",
     "jsdom": "29.1.1",
+    "pdfkit": "0.19.1",
     "prettier": "3.9.5",
     "prettier-plugin-tailwindcss": "0.8.0",
     "sharp": "0.35.3",
     "tailwindcss": "4.3.2",
+    "tsx": "4.23.1",
     "typescript": "6.0.3",
     "typescript-eslint": "8.64.0",
     "vitest": "4.1.10",

@@ -22,18 +22,18 @@ export default function HomePage() {
             {site.name} · {site.location}
           </p>
           <h1 className="mt-4 max-w-4xl text-5xl font-extrabold leading-[1.02] text-ink sm:text-6xl md:text-7xl">
-            Helping businesses put{' '}
-            <span className="text-volt">AI to work</span>.
+            Software engineering and{' '}
+            <span className="text-volt">AI adoption</span>, done properly.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-muted">
             {site.intro}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/services/" variant="primary">
-              Explore AI services
+              What I can do for you
             </ButtonLink>
-            <ButtonLink href="/contact/" variant="ghost">
-              Book an assessment
+            <ButtonLink href="/experience/" variant="ghost">
+              View my resume
             </ButtonLink>
           </div>
           <ul className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-ink-muted">
@@ -78,7 +78,33 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* AI, front and centre */}
+      {/* Two pillars intro */}
+      <Section>
+        <SectionHeading
+          eyebrow="What I do"
+          title="Two strengths that make each other better"
+          intro="I still design and ship software, and I help businesses get real value from AI. The engineering keeps the AI advice grounded; the AI makes the engineering faster. You can engage me for either, or both."
+        />
+      </Section>
+
+      {/* Pillar 1: Software engineering */}
+      <Section className="bg-surface">
+        <SectionHeading
+          eyebrow="Software engineering"
+          title="Real products, built and kept running"
+          intro="Twenty-five years of shipping software, from a single form to a multi-tenant platform, plus the consulting and hands-on tech work around it."
+        />
+        <div className="mt-8">
+          <ServicesGrid teaser />
+        </div>
+        <div className="mt-8">
+          <ButtonLink href="/services/" variant="ghost">
+            Explore engineering services
+          </ButtonLink>
+        </div>
+      </Section>
+
+      {/* Pillar 2: AI adoption */}
       <Section>
         <SectionHeading eyebrow="AI adoption" title={aiHeadline} intro={aiIntro} />
         <ul className="mt-10 grid gap-5 md:grid-cols-3">
@@ -105,23 +131,6 @@ export default function HomePage() {
           </ButtonLink>
           <ButtonLink href="/contact/" variant="ghost">
             Book an assessment
-          </ButtonLink>
-        </div>
-      </Section>
-
-      {/* Supporting services */}
-      <Section className="bg-surface">
-        <SectionHeading
-          eyebrow="Beyond AI"
-          title="Twenty-five years of engineering behind it"
-          intro="AI advice lands better coming from someone who still builds the systems. I also do the software, consulting and hands-on tech work that backs it up."
-        />
-        <div className="mt-8">
-          <ServicesGrid teaser />
-        </div>
-        <div className="mt-8">
-          <ButtonLink href="/services/" variant="ghost">
-            Explore all services
           </ButtonLink>
         </div>
       </Section>

@@ -8,6 +8,15 @@
  * Australia Post (from Nov 2023) is the current role.
  */
 
+/** Resume header: title, one-line pitch, and professional summary. */
+export const resumeHeadline = 'Software Engineering Leader';
+
+export const resumeTagline =
+  'Hands-on engineering leader with 25 years across software delivery, team leadership and, increasingly, practical AI adoption.';
+
+export const professionalSummary =
+  "I lead engineering teams and still ship code. Over 25 years I have grown from software engineer to General Manager level, currently running the engineering behind Australia Post's Point of Sale across around 4,000 stores. I care about delivery, reliability and the people doing the work; I ran a 150-engineer graduate program and have raised engineering standards everywhere I have led. Lately I have brought AI tooling (Claude, Microsoft 365 Copilot, GitHub Copilot) into how my teams work, and I help other businesses do the same.";
+
 export type Role = {
   company: string;
   title: string;

@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import {
+  resumeHeadline,
+  resumeTagline,
+  professionalSummary,
   roles,
   earlierRoles,
   skills,
@@ -8,22 +11,23 @@ import {
 import { site } from '@/content/site';
 import { formatRange } from '@/lib/dates';
 import { Container } from '@/components/Container';
-import { Section, SectionHeading } from '@/components/Section';
+import { Section } from '@/components/Section';
 import { ButtonLink } from '@/components/Button';
 import { Duotone } from '@/components/Duotone';
 
 export const metadata: Metadata = {
-  title: 'Experience',
+  title: 'Resume',
   description:
-    "James Evans's career: Engineering Manager at Australia Post, engineering leadership at Telstra, and 25 years across software engineering roles in Australia, New Zealand and the UK.",
+    "James Evans, Software Engineering Leader. 25 years across software delivery and team leadership, currently Engineering Manager at Australia Post, with hands-on AI adoption experience. Full resume and PDF download.",
   alternates: { canonical: '/experience/' },
 };
 
 export default function ExperiencePage() {
   return (
     <>
+      {/* Resume header */}
       <section className="border-b border-line">
-        <Container className="py-16 sm:py-20">
+        <Container className="py-14 sm:py-20">
           <div className="grid gap-8 md:grid-cols-[auto_1fr] md:items-center">
             <Duotone
               src="/images/portrait.jpg"
@@ -31,31 +35,84 @@ export default function ExperiencePage() {
               width={421}
               height={421}
               priority
+              variant="cutout"
               className="w-32 sm:w-40"
               sizes="10rem"
             />
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-volt">
-                The online resume
-              </p>
-              <h1 className="mt-3 text-4xl font-extrabold text-ink sm:text-5xl">
+              <h1 className="text-4xl font-extrabold text-ink sm:text-5xl">
                 {site.name}
               </h1>
-              <p className="mt-3 max-w-2xl text-lg leading-relaxed text-ink-muted">
-                Software engineering leader, {site.location}. Twenty-five years
-                building software and the teams that build it.
+              <p className="mt-1 font-display text-lg font-bold text-volt">
+                {resumeHeadline}
+              </p>
+              <p className="mt-3 max-w-2xl leading-relaxed text-ink-muted">
+                {resumeTagline}
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <ButtonLink href="/resume.pdf" variant="primary">
+                  Download PDF resume
+                </ButtonLink>
+                <ButtonLink href={`mailto:${site.email}`} variant="ghost">
+                  Contact me
+                </ButtonLink>
+              </div>
+              <p className="mt-4 text-sm text-ink-muted">
+                {site.location} · {site.email} ·{' '}
+                <a
+                  href={site.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-volt hover:underline"
+                >
+                  LinkedIn
+                </a>
               </p>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* Timeline */}
+      {/* Professional summary */}
       <Section>
-        <SectionHeading eyebrow="Career" title="Where I have worked" />
-        <ol className="mt-10 border-l-2 border-line">
+        <div className="max-w-3xl">
+          <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-volt">
+            Summary
+          </h2>
+          <p className="mt-3 text-lg leading-relaxed text-ink">
+            {professionalSummary}
+          </p>
+        </div>
+      </Section>
+
+      {/* Skills, scannable near the top for recruiters */}
+      <Section className="bg-surface">
+        <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-volt">
+          Skills
+        </h2>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {skills.map((skill) => (
+            <li
+              key={skill}
+              className="rounded-full border border-line bg-paper px-3 py-1 text-sm font-medium text-ink"
+            >
+              {skill}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      {/* Experience timeline */}
+      <Section>
+        <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-volt">
+          Experience
+        </h2>
+        <ol className="mt-8 border-l-2 border-line">
           {roles.map((role, i) => (
-            <li key={`${role.company}-${role.start}`} className="relative pb-10 pl-8 last:pb-0">
+            <li
+              key={`${role.company}-${role.start}`}
+              className="relative pb-10 pl-8 last:pb-0"
+            >
               <span
                 aria-hidden="true"
                 className={
@@ -80,7 +137,7 @@ export default function ExperiencePage() {
                   {role.highlights.map((h) => (
                     <li key={h} className="flex gap-2 text-sm text-ink">
                       <span aria-hidden="true" className="text-flare">
-                        ▸
+                        &#9656;
                       </span>
                       {h}
                     </li>
@@ -92,14 +149,14 @@ export default function ExperiencePage() {
         </ol>
       </Section>
 
-      {/* Earlier roles + skills + education */}
+      {/* Earlier career + education */}
       <Section className="bg-surface">
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
-            <h2 className="font-display text-2xl font-extrabold text-ink">
+            <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-volt">
               Earlier career
             </h2>
-            <ul className="mt-5 flex flex-col gap-3">
+            <ul className="mt-4 flex flex-col gap-3">
               {earlierRoles.map((role) => (
                 <li
                   key={`${role.company}-${role.years}`}
@@ -114,11 +171,13 @@ export default function ExperiencePage() {
                 </li>
               ))}
             </ul>
+          </div>
 
-            <h2 className="mt-10 font-display text-2xl font-extrabold text-ink">
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-volt">
               Education
             </h2>
-            <ul className="mt-5 flex flex-col gap-3">
+            <ul className="mt-4 flex flex-col gap-3">
               {education.map((e) => (
                 <li key={e.qualification} className="text-sm">
                   <p className="font-semibold text-ink">{e.qualification}</p>
@@ -128,30 +187,14 @@ export default function ExperiencePage() {
                 </li>
               ))}
             </ul>
-          </div>
 
-          <div>
-            <h2 className="font-display text-2xl font-extrabold text-ink">
-              Skills
-            </h2>
-            <ul className="mt-5 flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <li
-                  key={skill}
-                  className="rounded-full border border-line bg-paper px-3 py-1 text-sm font-medium text-ink"
-                >
-                  {skill}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-10 rounded-[var(--radius-card)] border border-line bg-paper p-6">
+            <div className="mt-8 rounded-[var(--radius-card)] border border-line bg-paper p-6">
               <p className="text-sm text-ink-muted">
-                Want the short version to keep or share?
+                Prefer a copy to keep or forward?
               </p>
               <div className="mt-4">
-                <ButtonLink href="/contact/" variant="ghost">
-                  Request a PDF resume
+                <ButtonLink href="/resume.pdf" variant="ghost">
+                  Download PDF resume
                 </ButtonLink>
               </div>
             </div>

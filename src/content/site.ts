@@ -14,16 +14,16 @@ export const site = {
   // Domain email via forwarding; the personal Gmail is never published.
   email: 'hello@jamesevans.au',
   linkedin: 'https://www.linkedin.com/in/-jamesevans/',
-  tagline: 'Helping businesses put AI to work.',
+  tagline: 'Software engineering and AI adoption, done properly.',
   intro:
-    "I help businesses adopt AI in a way that actually sticks. Assessing where it pays off, building AI skills that automate real work, and getting Claude, OpenAI or Copilot running for your team. Backed by twenty-five years of engineering, including leading the technology behind Australia Post's Point of Sale in around 4,000 stores.",
+    "Twenty-five years building software and leading the teams that build it, now including the technology behind Australia Post's Point of Sale in around 4,000 stores. I design and ship real products, and I help businesses adopt AI in a way that actually sticks. Two things I do well, and they make each other better.",
   description:
-    'James Evans helps Melbourne businesses adopt AI: assessments, workflow automation, and setting up Claude, OpenAI and Microsoft Copilot. Backed by 25 years of software engineering, plus custom apps and hands-on tech help.',
+    'James Evans is a Melbourne software engineering leader with 25 years of experience. Custom web and mobile apps, engineering leadership, and practical AI adoption: assessments, workflow automation, and setting up Claude, OpenAI and Microsoft Copilot.',
 } as const;
 
 export const navLinks = [
   { href: '/services/', label: 'Services' },
-  { href: '/experience/', label: 'Experience' },
+  { href: '/experience/', label: 'Resume' },
   { href: '/work/', label: 'Work' },
   { href: '/about/', label: 'About' },
   { href: '/contact/', label: 'Contact' },
@@ -32,8 +32,8 @@ export const navLinks = [
 export type Stat = { value: string; label: string };
 
 export const stats: Stat[] = [
-  { value: 'Daily', label: 'hands-on with Claude, Copilot and OpenAI' },
   { value: '25 yrs', label: 'in software engineering' },
   { value: '~4,000', label: "stores running my team's Point of Sale" },
   { value: '250k+', label: 'assets captured by Audify, built end-to-end' },
+  { value: 'Daily', label: 'hands-on with Claude, Copilot and OpenAI' },
 ];
