@@ -11,8 +11,8 @@ export const site = {
   tradingName: 'James Evans',
   abn: null as string | null,
   location: 'Melbourne, Australia',
-  // Domain email via forwarding; the personal Gmail is never published.
-  email: 'hello@jamesevans.au',
+  // Primary domain mailbox (Fastmail); the personal Gmail is never published.
+  email: 'me@jamesevans.au',
   linkedin: 'https://www.linkedin.com/in/-jamesevans/',
   tagline: 'Software engineering and AI adoption, done properly.',
   intro:

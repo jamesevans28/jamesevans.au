@@ -1,0 +1,5 @@
+- generic [active] [ref=e1]:
+  - heading "Sandbox loader test harness" [level=3] [ref=e2]
+  - generic [ref=e3]: running…
+  - iframe [ref=e4]:
+    - heading "LESSON RENDERED" [level=1] [ref=f1e2]

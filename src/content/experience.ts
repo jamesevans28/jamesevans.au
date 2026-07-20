@@ -47,7 +47,7 @@ export const roles: Role[] = [
   currentRole,
   {
     company: 'Telstra',
-    title: 'Chapter Lead Principal (General Manager)',
+    title: 'Chapter Lead Principal',
     start: '2022-08',
     end: '2023-11',
     location: 'Melbourne',

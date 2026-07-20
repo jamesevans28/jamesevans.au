@@ -33,7 +33,7 @@ describe('site content integrity', () => {
   it('does not publish the personal Gmail', () => {
     const serialized = JSON.stringify(site);
     expect(serialized).not.toMatch(/gmail/i);
-    expect(site.email).toBe('hello@jamesevans.au');
+    expect(site.email).toBe('me@jamesevans.au');
   });
 });
 
