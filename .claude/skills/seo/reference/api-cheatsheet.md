@@ -90,6 +90,63 @@ field data — expect `no CrUX data` and rely on lab + GSC's Core Web Vitals
 report. Baseline recorded 25 Jul 2026 for `/`: performance 99, SEO 100,
 LCP 0.3s, CLS 0.001.
 
+## IndexNow (Bing, Yandex, Seznam, Naver, Yep, Internet Archive, Amazon)
+
+`npm run seo -- indexnow <url...>` or `--all` (sitemap-wide, adoption only).
+
+- One POST to `https://api.indexnow.org/indexnow` fans out to all
+  participants; one key works everywhere.
+- Key is **public by design** — `public/<key>.txt`, content is the key alone,
+  served at `https://jamesevans.au/<key>.txt`. Not a secret; it is proof of
+  domain control. Rotating = replacing the file (the CLI derives the key from
+  whichever `<key>.txt` is in `public/`).
+- Batch limit 10,000 URLs; all must match the declared host or 422.
+- **Google does not support IndexNow** and never adopted it. Zero effect on
+  Google. Worth doing anyway because ChatGPT's search leans on Bing.
+- Response codes: 200 accepted · 202 accepted, key validation _pending_ ·
+  400 bad format · 403 key not found/mismatched · 422 host mismatch ·
+  429 rate limited.
+- **202 is not proof of success** — key validation is asynchronous. Verified
+  25 Jul 2026: a 202 came back while the key file was still 404ing. The CLI
+  pre-checks the key file is live and refuses to submit otherwise.
+- Submit only changed URLs. Bing advises against backfilling archives;
+  bulk dumps risk 429s and consume crawl quota.
+
+## Bing Webmaster Tools API
+
+Reporting only — IndexNow covers submission better. Base URL
+`https://ssl.bing.com/webmaster/api.svc/json/<Method>`, auth via
+`?apikey=<key>` query param (an API key is simpler than OAuth here and fully
+supported). Key: bing.com/webmasters → Settings → API Access → Generate.
+**One key per user, not per site**; regenerating breaks every consumer.
+
+Useful methods (all GET unless noted): `GetUserSites`,
+`GetRankAndTrafficStats` (daily granularity), `GetQueryStats` (**weekly
+refresh** — don't build daily deltas on it), `GetPageStats`,
+`GetPageQueryStats`, `GetCrawlIssues`, `GetUrlInfo`,
+`GetUrlSubmissionQuota`, `SubmitUrlBatch` (POST, ≤500 URLs).
+
+Gotchas that will bite:
+
+- **No `sc-domain:` analogue.** `siteUrl` is a plain origin and must match
+  exactly how the site was verified (scheme and `www` included). Call
+  `GetUserSites` once and reuse the returned string verbatim — mismatches
+  are the top cause of silent failures.
+- Every response is wrapped in a `{"d": …}` envelope.
+- Dates are WCF format — `/Date(1316156400000-0700)/`, not ISO 8601.
+- **All errors return HTTP 400**, including bad auth and quota; the real
+  reason is only in the body (`{"ErrorCode":…,"Message":…}`). Don't branch on
+  status codes alone.
+- `GetCrawlIssues` returns `Issues` as a **bitmask int**, not an enum value —
+  decode flags, don't compare equality. The numeric→name table is not in
+  Microsoft's current docs (the page 404s); verify empirically before trusting
+  any mapping.
+- Submission quota is _earned_ from site age and impressions — new sites
+  often start ~100/day against a 10,000/day ceiling. Call
+  `GetUrlSubmissionQuota` before batching rather than assuming.
+- Microsoft's docs for this API are effectively unmaintained (2019–2022
+  vintage, several pages 404). Verify response shapes against live calls.
+
 ## Auth model
 
 A **dedicated service account in a personal GCP project**, deliberately

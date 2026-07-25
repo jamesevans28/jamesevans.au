@@ -21,9 +21,18 @@
  *   gsc sitemaps               list submitted sitemaps and their status
  *   gsc api <METHOD> <path> [--json <body>]
  *                              raw Search Console API passthrough
+ *   indexnow <url...>          push URLs to Bing/Yandex/etc (not Google)
+ *   indexnow --all             push every URL in the built sitemap
+ *   bing sites                 verified sites (and the exact siteUrl to use)
+ *   bing traffic               daily impressions/clicks series
+ *   bing queries               per-query stats (refreshes weekly)
+ *   bing pages                 per-page stats
+ *   bing crawl                 crawl stats and issues
+ *   bing inspect <url>         index status for one URL
+ *   bing quota                 remaining URL submission quota
  *
  * Everything prints JSON to stdout so the caller (the seo skill) can reason
- * over it. Access is via gcloud ADC — see scripts/seo/google.ts for setup.
+ * over it. Auth is a service account — see scripts/seo/google.ts for setup.
  *
  * Logs contain aggregate metrics, page paths, and search queries only —
  * never reader personal data.
@@ -45,6 +54,8 @@ import {
   SITE_URL,
 } from './google';
 import { runAudit } from './audit';
+import { indexNowKey, sitemapUrls, submitUrls } from './indexnow';
+import * as bing from './bing';
 
 const argv = process.argv.slice(2);
 
@@ -276,6 +287,42 @@ async function main() {
         );
         process.exit(2);
       }
+      return;
+    }
+
+    case 'bing': {
+      if (sub === 'sites') return out(await bing.listSites());
+      if (sub === 'traffic') return out(await bing.rankAndTraffic());
+      if (sub === 'queries') return out(await bing.queryStats());
+      if (sub === 'pages') return out(await bing.pageStats());
+      if (sub === 'crawl')
+        return out({
+          stats: await bing.crawlStats(),
+          issues: await bing.crawlIssues(),
+        });
+      if (sub === 'inspect') {
+        const url = rest[0] ?? flag('page');
+        if (!url) fail('usage: bing inspect <url>');
+        return out(await bing.urlInfo(url));
+      }
+      if (sub === 'quota') return out(await bing.submissionQuota());
+      fail(`unknown bing subcommand: ${sub ?? '(none)'}`);
+      return;
+    }
+
+    case 'indexnow': {
+      const urls = argv.includes('--all')
+        ? sitemapUrls()
+        : argv.slice(1).filter((a) => a.startsWith('http'));
+      if (urls.length === 0)
+        fail(
+          'usage: indexnow <url...> | indexnow --all (URLs must be absolute)',
+        );
+      const result = await submitUrls(urls, SITE_URL);
+      out({ key: `${indexNowKey().slice(0, 6)}… (public)`, ...result });
+      // 403/422 mean the key file isn't reachable or the host is wrong —
+      // a silent zero here would look like success.
+      if (result.status >= 400) process.exit(2);
       return;
     }
 

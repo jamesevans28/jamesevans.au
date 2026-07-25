@@ -142,7 +142,39 @@ a single-locale site. The levers that remain:
 - Report — but don't fabricate — off-site gaps: AU media mentions,
   podcasts, and communities are the biggest lever we can't automate.
 
-### 6. GA management
+### 6. Getting new posts discovered
+
+Publishing doesn't mean being found. Two separate paths, because no single
+mechanism covers both:
+
+- **Google** — sitemap.xml plus Search Console. There is no push API for us
+  (the Indexing API is scoped to job postings and broadcast events only), so
+  discovery is: make sure the sitemap lists the post, then verify with
+  `gsc inspect <url>` on the next run.
+- **Everyone else** — `npm run seo -- indexnow <url>` pushes to Bing,
+  Yandex, Seznam, Naver, Yep, Internet Archive, and Amazon in one call.
+  **Google does not support IndexNow**; never claim otherwise in a report.
+  This still matters because ChatGPT's search leans on Bing's index, so
+  fast Bing coverage is a GEO lever.
+
+Bing has its own reporting, worth checking alongside Search Console:
+`bing traffic` (daily series), `bing queries` (**weekly refresh** — never
+compute daily deltas from it), `bing pages`, `bing crawl`,
+`bing inspect <url>`, `bing quota`. Verified working 25 Jul 2026; reports
+were empty because the site had just been verified, and Bing needs up to 48h.
+A `null` crawl date means never crawled, not an error.
+
+Run `indexnow` for a URL after `blog-post` publishes it. Submit only what
+actually changed — Bing's guidance is not to backfill an archive, and bulk
+dumps risk 429s. `--all` exists for the one-off adoption ping, not routine use.
+
+**A 202 response does not mean success.** IndexNow validates the key file
+asynchronously, so it returns 202 even when the key is missing (observed
+25 Jul 2026 against a 404ing key). The CLI therefore checks the key file is
+live before submitting and refuses otherwise — if it refuses, the fix is to
+deploy `public/<key>.txt`, not to retry.
+
+### 7. GA management
 
 James has given standing approval for **additive** GA4 configuration that
 improves insight, e.g.:
@@ -173,20 +205,25 @@ kept deliberately separate from Audify, Kairos, and anything work-related.
 Full details and the reason gcloud ADC can't be used are in
 `reference/api-cheatsheet.md` ("Auth model").
 
-`npm run seo -- auth` is the single source of truth on what works. Built and
-verified 25 Jul 2026: the service account authenticates, GA Admin returns
-ok, and `psi` runs on our own quota. **Two steps remain that only James can
-do**, because GCP IAM does not grant access to these products:
+`npm run seo -- auth` is the single source of truth on what works. **Fully
+set up and verified end to end on 25 Jul 2026** — all three Google surfaces
+return ok, and every credential is in place:
 
-1. **GA4** → Admin → Property access management → add
-   `seo-agent@jamesevans-au-seo.iam.gserviceaccount.com` as Editor
-   (Viewer works for read-only; Editor enables the GA management mode).
-2. **Search Console** → confirm a property for jamesevans.au exists, then
-   Settings → Users and permissions → add the same email as **Full** user
-   (Full is required for URL Inspection).
+| Surface          | Credential                   | Access                                 |
+| ---------------- | ---------------------------- | -------------------------------------- |
+| GA4 Data + Admin | service account              | Editor on the property                 |
+| Search Console   | same service account         | Full user on `sc-domain:jamesevans.au` |
+| PageSpeed        | API key, `psi-api-key.txt`   | restricted to pagespeedonline          |
+| Bing Webmaster   | API key, `bing-api-key.txt`  | site verified, quota 100/day           |
+| IndexNow         | public key file in `public/` | fans out to 7 engines                  |
 
-Until then, GA data and GSC commands fail with a clear 403 naming the fix;
-`audit` and `psi` work regardless, since neither needs those grants.
+All credentials live in `~/.config/jamesevans-au-seo/` at mode 600, outside
+the repo. Nothing further is needed from James for routine runs.
+
+If a credential ever breaks, each command prints the specific remediation
+rather than failing vaguely — follow that, and don't re-derive setup from
+scratch. Note that regenerating the Bing key in its UI invalidates the old
+one (there is one key per user, not per site).
 
 ## Cost control
 
