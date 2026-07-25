@@ -41,6 +41,13 @@ Reference material in this skill's directory:
 - **Honest severity.** The audit is only useful if a quiet report means
   the site is genuinely healthy. Don't pad reports with non-issues to look
   thorough; "no action needed" is a valid conclusion.
+- **Respect small numbers.** The site is new and low-traffic (19 users in
+  the 28 days to 25 Jul 2026). Below roughly 100 users per page per window,
+  differences between pages are noise: report them as observations to
+  revisit, never as conclusions, and never rewrite a page because 3 users
+  behaved differently from 4. Distinguish _no data yet_ (expected, say so
+  plainly) from _a real problem_ — an empty Search Console report on a new
+  property is the former; a page Google has never crawled is the latter.
 
 ## Modes
 
@@ -56,13 +63,23 @@ assumptions and continue.
 2. `npm run seo -- ga trends --days 28` — is traffic growing?
 3. `npm run seo -- gsc queries --days 28 --country AUS` — AU search reality.
 4. `npm run build && npm run seo -- audit` — regression check on the export.
-5. Compare against the previous report in `docs/seo/` (see Reports below).
+5. **Indexing check** — `gsc sitemaps` (submitted, current, error-free) plus
+   `gsc inspect` on any post published since the last report. A page Google
+   has never crawled earns nothing, and no other report surfaces this: on
+   25 Jul 2026 the entire blog was "unknown to Google" while every other
+   signal looked healthy. If a post is unknown more than ~a week after the
+   sitemap listed it, investigate — don't just resubmit.
+6. Compare against the previous report in `docs/seo/` (see Reports below).
 
 Deliverable: a report answering five questions — traffic direction, which
 pages/posts win and lose on engagement, what Australia searches to find us,
 striking-distance opportunities (position 4–15, sorted by impressions),
 and any new technical findings. End with ≤3 prioritised actions, each with
 its grounding evidence. Apply the safe ones in the same run.
+
+While traffic is this low, weight the technical and indexing findings over
+the analytics ones — they're the parts that are actually actionable, and the
+engagement numbers won't mean much for a while yet.
 
 ### 2. Technical audit
 
