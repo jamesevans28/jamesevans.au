@@ -1,7 +1,7 @@
 # jamesevans.au — Blog Section Plan
 
 **Author:** Claude (planning session, 25 July 2026)
-**Status:** Phases B1–B4 + scheduled operation built (25 July 2026). Not yet deployed — see "Before first deploy" below.
+**Status:** Phases B1–B4 + scheduled operation built and **deployed** (25 July 2026). Table live in ap-southeast-2; two briefs queued from a first research run.
 **Depends on:** the existing site (see `docs/PLAN.md`, Phases 0–4 built)
 
 ---
@@ -26,12 +26,27 @@ Verified locally: **lint + typecheck + 195 tests + static export all green**, al
 - **`slugifyHeading` mirrors `github-slugger` exactly** — it replaces whitespace per character rather than collapsing runs, so `"AI & You"` → `ai--you`. Collapsing produced table-of-contents links pointing at ids the page didn't have; verified against the real library across 14 cases and locked in by a regression test.
 - **Build-time tooling lives in `devDependencies`.** The AWS SDK, unified/rehype stack and Shiki all run at build time only; nothing new ships to the browser (runtime deps are unchanged) and a rendered post adds zero client JS.
 
-### Before first deploy
+### Deployment status (25 July 2026)
 
-1. `cdk deploy JamesEvansBlog` (and re-deploy `JamesEvansDeployRole` for the new read grant).
-2. Set the `BLOG_TABLE` GitHub repo variable to `jamesevans.au-blog`.
-3. Grant James's local AWS profile read/write on the table (the CLI writes; CI never does).
-4. Find a topic (`blog-research` skill), then write it (`blog-post` skill) — or go straight to `npm run blog -- draft <slug>`.
+Done:
+
+1. ✅ `JamesEvansBlog` deployed to ap-southeast-2 — `jamesevans.au-blog` ACTIVE, on-demand, `by-status` GSI ACTIVE, PITR enabled, deletion protection on.
+2. ✅ `JamesEvansDeployRole` updated with read-only `Query`/`GetItem`/`BatchGetItem` on the table + indexes. Site and edge stacks untouched.
+3. ✅ `BLOG_TABLE=jamesevans.au-blog` set as a GitHub repo variable (`jamesevans28/jamesevans.au`), alongside the pre-existing `AWS_DEPLOY_ROLE_ARN`, `AWS_REGION`, `SITE_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`, `NEXT_PUBLIC_GA_ID`.
+4. ✅ First research run queued two briefs (see below).
+
+Remaining: write the first post (`blog-post` skill, or `npm run blog -- draft <slug>`). The site currently deploys with an empty blog, which is handled — the index shows its empty state and `/blog/[slug]` emits only a `noindex` 404 placeholder.
+
+### First research run (25 July 2026)
+
+| Score | Brief | Action | Why not auto-published |
+|---|---|---|---|
+| 28/30 | `why-ai-gives-you-confident-wrong-answers` | write draft | Both statistics came via secondary sources; `evidence` scored 4/5, and auto-publish needs 5 |
+| 25/30 | `ai-privacy-rules-australian-small-business` | write draft | Below the 26 threshold; also `CONFLICTING` and `newsy` |
+
+The 28/30 case is the evidence gate doing its job on real data: above the score threshold, held back anyway because the sourcing wasn't clean.
+
+The privacy brief is a good example of why verification matters. Australia's automated decision-making transparency obligation (commencing **10 December 2026**, per an OAIC issues paper) is solid and well-sourced. But whether the **$3m small business exemption has been removed** is genuinely contested — one source says it "has NOT been formally repealed yet", another says removal commences 10 December 2026 affecting ~2.5 million businesses, and a law firm headline asserts it is already gone. That went into the brief as `CONFLICTING` with a `doNotClaim` entry, so a draft can describe the ADM obligation without asserting a legal position the evidence doesn't support.
 
 ---
 
