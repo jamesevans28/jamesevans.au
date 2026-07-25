@@ -84,9 +84,36 @@ Every post should fit one of these (they map to the tag taxonomy):
   published** (the slug is the URL).
 - No keyword stuffing. Write for the reader; the structure does the SEO work.
 
+## Starting from a research brief
+
+If a brief exists at `content-drafts/research/<date>-<slug>.md` (produced by the
+`blog-research` skill), **read it first and write from it.** It carries the
+search phrasings to target, verified statistics with sources, reader pain points,
+tools to mention, and the differentiator.
+
+Rules when working from a brief:
+
+- **Use only the figures in the "Verified facts and figures" table**, and only
+  with the attribution given. Do not add statistics from memory — if the brief
+  doesn't have it, leave it out.
+- Anything marked `CONFLICTING` must either cite both figures with both sources,
+  or be avoided. Never pick the more dramatic number.
+- **Honour the "Do not claim" section.** Those statements failed verification.
+- Frame headings in the reader's own vocabulary from "Search demand".
+- The brief suggests a title and slug; improve them if you can, but keep the
+  title ≤ 65 characters and the slug kebab-case.
+
+If James asks for a post on a topic with **no brief**, say a brief would make it
+stronger and offer to run `blog-research` first. If he'd rather go straight to
+drafting, do it — but then write only from what you can state without inventing
+evidence, and keep statistics out unless you verify them as you go.
+
 ## Workflow
 
 ```bash
+# 0. If a brief exists, read it first
+#    content-drafts/research/<date>-<slug>.md
+
 # 1. Scaffold
 npm run blog -- draft how-to-use-ai-to-write-better-emails
 
@@ -123,6 +150,7 @@ Rewrite the content under the same slug instead.
 
 ## Reference
 
+- Topic research and briefs: the `blog-research` skill
 - Plan and decisions: `docs/BLOG_PLAN.md`
 - Validation rules: `src/lib/blog-schema.ts`
 - Static copy (blog intro, tag labels): `src/content/blog.ts`

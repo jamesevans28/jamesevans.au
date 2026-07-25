@@ -14,6 +14,7 @@ Verified locally: **lint + typecheck + 156 tests + static export all green**, al
 - **B2** — `/blog` index + `/blog/[slug]` articles, markdown pipeline (`src/lib/markdown.ts`: remark/rehype + Shiki, sanitised), `.prose-volt` theme in `globals.css`, `PostCard`, on-page table of contents, related posts, Blog nav link. ✅
 - **B3** — Per-post `generateMetadata` (canonical, OpenGraph `article`, Twitter card), `BlogPosting` + `Blog` + `BreadcrumbList` JSON-LD, per-post OG images (`scripts/generate-blog-og.mjs`, wired to `prebuild`), sitemap entries with real `lastModified`, RSS at `/feed.xml`. ✅
 - **B4** — `scripts/blog/index.ts` CLI (`draft`/`pull`/`push`/`publish`/`unpublish`/`list`/`lint`/`preview`), `repository_dispatch: blog-publish` on the deploy workflow, authoring skill at `.claude/skills/blog-post/SKILL.md`. ✅
+- **B4a** — Topic research skill at `.claude/skills/blog-research/SKILL.md`: searches five angles (search demand, new tools, reader pain points, trending discussion, Australian angle), verifies statistics to their primary source, scores 5–8 candidates, and writes a structured brief to `content-drafts/research/<date>-<slug>.md` that `blog-post` consumes. Worked example at `reference/example-brief.md`. ✅
 
 ### Decisions made during the build
 
@@ -30,7 +31,18 @@ Verified locally: **lint + typecheck + 156 tests + static export all green**, al
 1. `cdk deploy JamesEvansBlog` (and re-deploy `JamesEvansDeployRole` for the new read grant).
 2. Set the `BLOG_TABLE` GitHub repo variable to `jamesevans.au-blog`.
 3. Grant James's local AWS profile read/write on the table (the CLI writes; CI never does).
-4. Write the first post: `npm run blog -- draft <slug>`, then follow the skill.
+4. Find a topic (`blog-research` skill), then write it (`blog-post` skill) — or go straight to `npm run blog -- draft <slug>`.
+
+### Topic research → draft handoff
+
+`blog-research` → brief in `content-drafts/research/` → `blog-post` → draft in DynamoDB → James approves → publish.
+
+The brief is the contract between the two skills. It carries verified statistics **with source URLs, dates, and geography**, the exact phrasings people search, reader pain points, tools worth mentioning, and a `Do not claim` list of statements that failed verification. `blog-post` may only use figures from the brief's table, with the attribution given.
+
+Two rules came out of testing the research process on live searches:
+
+- **AI adoption statistics contradict each other constantly.** A real run turned up 74% (US, "using or testing"), 28% (US, "adoption"), and 43–44% (Australia, National AI Centre) for what reads like the same question. The skill records conflicts as `CONFLICTING` with both sources rather than picking one, because the differences are definitional (*ever tried* vs *uses regularly* vs *embedded across the business*).
+- **Statistics must be followed to their primary source.** The widely-quoted 74% figure turns out to be a US-only survey (Centiment for Bluevine, n=942, April 2026) — quoting it as an Australian fact would have been wrong. Round-up blogs routinely drop the geography and date.
 
 ---
 
