@@ -19,7 +19,7 @@ always: **draft, show him, wait.**
 3. Publish **only** after he says to.
 
 Never run `publish` on your own initiative when a human is in the loop, even if
-the request sounded like "write and publish something about X" — draft it, then
+the request sounded like "write and publish something about X". Draft it, then
 confirm.
 
 ### The one exception: an auto-publish brief
@@ -29,14 +29,14 @@ may publish without asking **only** when all of these hold:
 
 - The work came from a queued brief, and
 - `npm run blog -- brief next` (or `brief add`) reported the action
-  **`write-and-publish`** — equivalently `brief add` exited `11`, and
+  **`write-and-publish`** (equivalently, `brief add` exited `11`), and
 - `npm run blog -- lint` passes with **no** problems, and
 - Every statistic you used came from the brief's `facts`, with its attribution,
   and none is marked `conflicting`, and
 - You made no claim listed in the brief's `doNotClaim`.
 
-If **any** of those fails — including "the draft ended up needing a figure the
-brief didn't have" — push the draft and stop for review. Downgrading to a draft
+If **any** of those fails, including "the draft ended up needing a figure the
+brief didn't have", push the draft and stop for review. Downgrading to a draft
 is always the safe choice and never the wrong one. Say clearly in your summary
 which path you took and why.
 
@@ -49,14 +49,88 @@ The reader is a smart, non-technical adult: a small-business owner, a
 professional curious about AI, someone who has tried a chatbot and wants to get
 more out of it. They are **not** engineers.
 
+Assume they are busy and mildly sceptical. They are not reading to understand
+AI. They are reading because something in their week is annoying and they want
+to know whether this helps.
+
+### Tell them what to do
+
+Most readers do not want to learn the subject. They want to be told the best way
+to do the thing, by someone who has already worked it out.
+
+- **Lead with the answer, not the background.** If the best approach is "paste
+  the document in and ask for the contradictions", say that early. Explanation
+  earns its place only where it changes what the reader does.
+- **One clear outcome per post.** Name it in the opening: what will they be able
+  to do by the end? If you cannot state it in a sentence, the post is unfocused.
+- **Prescribe.** "Do this" beats "you might consider". Give the actual prompt,
+  the actual setting, the actual sequence.
+- **Cut the theory that does not change behaviour.** How a model works is worth
+  a paragraph only if it tells the reader when to distrust the output.
+- If there are five valid approaches, pick the one you would recommend and say
+  why. A survey of options leaves them where they started.
+
+### Be opinionated
+
+This is new ground for most readers and they are drowning in vendor hype and
+vague both-sides coverage. A clear opinion from someone who does this for a
+living is the value.
+
+- **Take a position and own it.** "Most AI note-takers are not worth the
+  subscription" is useful. "There are pros and cons to AI note-takers" is not.
+- **Say what is bad.** Naming what does not work builds more trust than any
+  amount of enthusiasm, and it is what a vendor blog cannot do.
+- **First person, plainly.** "I would not use it for that." "This is the one I
+  actually use." James has 25 years of engineering judgement; write like it.
+- Strong opinions still need honest evidence. Never invent credentials, clients,
+  case studies, statistics or quotes to support a position. If a claim needs a
+  source and you do not have one, cut the claim or soften it to what you can
+  stand behind.
+- Being opinionated is not being contrarian. Do not manufacture a hot take.
+
+### Open with a hook
+
+The first two sentences decide whether anyone reads the rest. No preamble, no
+"in this article we will".
+
+Things that work:
+
+- The reader's own frustration, stated so precisely they feel caught out:
+  *"Ask an AI something it doesn't know and it won't tell you that."*
+- A blunt claim that makes them want to argue: *"Most people are using AI as a
+  worse Google."*
+- A specific moment: *"A client sent me a three-page quote last month that an AI
+  had written. You could tell."*
+- A cost they are already paying without noticing.
+
+Never open with a definition, a statistic they did not ask for, or a description
+of what the post covers.
+
+### Make it relatable
+
+The reader needs to see themselves in it. Reach for where they actually live:
+their business, their job, or their personal life.
+
+- **Anchor every abstract point to a concrete situation.** Not "AI can help with
+  documentation" but "the induction checklist you have been meaning to write
+  since March".
+- **Use recognisable specifics:** the overdue invoice, the supplier contract
+  nobody read properly, the Sunday night quote, the staff roster, the school
+  form, the insurance renewal.
+- **Rotate the setting.** Not every example should be a small business. Some
+  readers are employees inside a bigger organisation; some are just trying to
+  sort out their own admin.
+- **Name the feeling, briefly.** The suspicion that you are behind. The
+  irritation of retyping the same email. One clause is enough.
+- Australian context where it fits naturally: the ATO, a BAS, Australia Post,
+  local council. Never force it.
+
+### Mechanics
+
 - **Plain English.** No jargon. If a technical term is unavoidable, define it in
   the sentence where it first appears.
-- **Concrete over abstract.** Real examples with real wording — an actual prompt,
-  an actual scenario — not "one could leverage AI for correspondence".
-- **Honest.** Say what AI is bad at as readily as what it's good at. No hype, no
-  breathless futurism, no "game-changer".
-- **Opinionated where it's commentary.** For trend and commentary pieces, take a
-  position and defend it. Hedging everything is boring and ranks badly.
+- **Concrete over abstract.** Real examples with real wording, an actual prompt,
+  an actual scenario, not "one could leverage AI for correspondence".
 - **Australian English.** "organise", "recognise", "centre". Dates as
   "20 July 2026".
 - **Second person.** Address the reader as "you". James writes as "I".
@@ -77,7 +151,7 @@ called this out on a live post, so treat it as a hard requirement.
   signature. Just say the thing.
 - **Rule-of-three everywhere.** Triads in lists, in sentence rhythm, in section
   counts. Real writing has twos and fives and sevens in it.
-- **Parallel bolded run-ins** — four sections that each open with a bolded
+- **Parallel bolded run-ins.** Four sections that each open with a bolded
   two-word phrase and run the same length. That symmetry is the loudest tell.
 - These words and phrases: delve, moreover, furthermore, landscape, realm,
   leverage (as a verb), robust, seamless, game-changer, unlock, harness,
@@ -101,8 +175,6 @@ called this out on a live post, so treat it as a hard requirement.
 
 Before pushing, read the draft back and ask: does any of this sound like it came
 out of a chatbot? Grep your own draft for `—` and for the banned words above.
-- Never invent credentials, clients, case studies, statistics, or quotes. If a
-  claim needs a source and you don't have one, cut the claim.
 
 ## Content pillars
 
@@ -120,25 +192,45 @@ Every post should fit one of these (they map to the tag taxonomy):
 
 ## Structure
 
-- **Title** — max 65 characters. Lead with the reader's outcome or question.
+**Before writing, write down the outcome in one sentence:** *"After this, the
+reader will be able to ___."* If it will not fit in a sentence, the post is not
+ready. Everything below serves that outcome.
+
+- **Title.** Max 65 characters. Lead with the reader's outcome or question.
   Match how people actually search ("How to…", "Five ways to…", "Is AI any good
   at…"). No colons-and-subtitles.
-- **Description** — 140–160 characters, hard requirement. This is the SERP
+- **Description.** 140 to 160 characters, hard requirement. This is the SERP
   snippet: say what the reader will be able to do after reading.
-- **Opening** — name the reader's problem in their words within the first two
-  sentences. No "In today's fast-paced world" and no summary of what the article
-  will cover.
-- **Body** — start sections at `##` (the page renders the title as the only H1).
+- **Opening.** A hook in the first two sentences (see "Open with a hook"), then
+  the outcome. The reader should know within about fifty words both why they
+  care and what they are going to get. No "In today's fast-paced world" and no
+  summary of what the article covers.
+- **Body.** Start sections at `##` (the page renders the title as the only H1).
   Use `###` sparingly. 1,200–2,000 words for guides; 700–1,200 for commentary.
-- **Close** — the single next action worth taking.
-- **Internal links** — link to `/services/` or `/work/` once or twice where it is
+  Put the recommendation first and the reasoning after it, not the other way
+  round. Every section should either tell the reader to do something or change
+  whether they trust something.
+- **Close.** The single next action worth taking. Not a recap.
+- **Internal links.** Link to `/services/` or `/work/` once or twice where it is
   genuinely relevant, never forced. Always with a trailing slash.
 - Short paragraphs (2–4 sentences). Lists where a list is genuinely clearer, not
   as a substitute for prose.
 
+### Self-check before pushing
+
+Read the draft and answer these. If any answer is weak, revise.
+
+1. Can you state the outcome in one sentence, and does the opening say it?
+2. Does the first sentence make someone want the second one?
+3. Where is the opinion? Point to the sentence where you actually recommend
+   something. If there isn't one, the post is a survey and needs a rewrite.
+4. Would a reader recognise their own week in at least two examples?
+5. Is there theory in here that does not change what they do? Cut it.
+6. Does it read like a chatbot wrote it? (See the checks above.)
+
 ## SEO rules (enforced by `blog lint`)
 
-- One H1 only — never write `# ` in the body.
+- One H1 only. Never write `# ` in the body.
 - Every image needs alt text.
 - Internal links need trailing slashes (`/services/`, not `/services`).
 - Title ≤ 65 chars; description 140–160 chars.
@@ -164,7 +256,7 @@ npm run blog -- brief show <briefId>
 npm run blog -- brief next --json
 ```
 
-`brief next` exits `3` when the queue is empty — report that and stop; don't
+`brief next` exits `3` when the queue is empty. Report that and stop; don't
 invent a topic to fill the slot.
 
 **Claim the brief as soon as you've chosen the post slug**, before writing:
@@ -180,7 +272,7 @@ runs writing the same article.
 Rules when working from a brief:
 
 - **Use only the figures in the "Verified facts and figures" table**, and only
-  with the attribution given. Do not add statistics from memory — if the brief
+  with the attribution given. Do not add statistics from memory. If the brief
   doesn't have it, leave it out.
 - Anything marked `CONFLICTING` must either cite both figures with both sources,
   or be avoided. Never pick the more dramatic number.
@@ -191,7 +283,7 @@ Rules when working from a brief:
 
 If James asks for a post on a topic with **no brief**, say a brief would make it
 stronger and offer to run `blog-research` first. If he'd rather go straight to
-drafting, do it — but then write only from what you can state without inventing
+drafting, do it, but then write only from what you can state without inventing
 evidence, and keep statistics out unless you verify them as you go. A post
 written without a brief is **never** eligible for auto-publishing.
 
@@ -257,7 +349,7 @@ npm run blog -- pull <slug>     # fetch current version into content-drafts/
 npm run blog -- push <slug>     # a published post stays published, and redeploys
 ```
 
-Never change the `slug` of a published post — it would orphan the indexed URL.
+Never change the `slug` of a published post; it would orphan the indexed URL.
 Rewrite the content under the same slug instead.
 
 ## Reference
