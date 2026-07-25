@@ -79,22 +79,48 @@ Search analytics via the canned commands; raw:
 
 ## PageSpeed Insights
 
-`npm run seo -- psi <url> [--mobile]` — no auth, but keyless quota is a
-shared pool that's often exhausted; set `PSI_API_KEY` for reliability.
-`fieldData` (CrUX, real users, 75th percentile) is authoritative;
-`lab` (Lighthouse) is diagnostic. Low-traffic pages have no field data —
-expect `no CrUX data` and rely on lab + GSC's Core Web Vitals report.
+`npm run seo -- psi <url> [--mobile]` — uses an API key restricted to
+`pagespeedonline.googleapis.com` at
+`~/.config/jamesevans-au-seo/psi-api-key.txt` (or `PSI_API_KEY`). PSI
+rejects the Analytics OAuth scopes, so a key is the only option; using our
+own key also avoids the anonymous shared quota pool, which is routinely
+exhausted. `fieldData` (CrUX, real users, 75th percentile) is
+authoritative; `lab` (Lighthouse) is diagnostic. Low-traffic pages have no
+field data — expect `no CrUX data` and rely on lab + GSC's Core Web Vitals
+report. Baseline recorded 25 Jul 2026 for `/`: performance 99, SEO 100,
+LCP 0.3s, CLS 0.001.
 
 ## Auth model
 
-gcloud **Application Default Credentials** as jjme28@gmail.com (owner of
-the GA property and GSC site). Required scopes: `analytics.readonly`,
-`analytics.edit`, `webmasters` (+ `cloud-platform`); quota project must
-have `analyticsdata`, `analyticsadmin`, `searchconsole` APIs enabled.
-`npm run seo -- auth` probes all three and prints the exact interactive
-commands when something's missing. A service account is the fallback if
-ADC proves flaky (create one, grant it on the GA property + GSC, point
-`GOOGLE_APPLICATION_CREDENTIALS` at the key) — not needed while ADC works.
+A **dedicated service account in a personal GCP project**, deliberately
+isolated from any client or employer project:
 
-Overrides (env): `SEO_GA_PROPERTY` (skip discovery), `SEO_GSC_SITE`,
-`SEO_SITE_URL`, `SEO_GA_MEASUREMENT_ID`, `PSI_API_KEY`.
+- project `jamesevans-au-seo` (no org/folder parent; jjme28@gmail.com sole owner)
+- account `seo-agent@jamesevans-au-seo.iam.gserviceaccount.com`
+- key `~/.config/jamesevans-au-seo/seo-agent.json` (mode 600, never committed)
+- APIs enabled: analyticsdata, analyticsadmin, searchconsole, pagespeedonline
+- the account holds `roles/serviceusage.serviceUsageConsumer` on its own
+  project, which it needs to spend that project's quota
+- every request sends `x-goog-user-project: jamesevans-au-seo`, so quota
+  never bills to whichever project gcloud happens to have selected
+
+**gcloud ADC cannot be used here.** gcloud's shared OAuth client is blocked
+by Google from requesting Analytics and Search Console scopes — the consent
+screen returns "This app is blocked" no matter what the user approves. The
+CLI signs its own JWT assertion (RFC 7523) instead, so there is no consent
+screen and no browser step.
+
+**GCP IAM does not grant Analytics or Search Console access** — those are
+granted inside each product's own UI, per property:
+
+1. GA4 → Admin → Property access management → add the service account email
+   (Viewer to read; Editor to let the skill manage custom dimensions and key events).
+2. Search Console → Settings → Users and permissions → add the same email as
+   Full user (Full is required for the URL Inspection API).
+
+`npm run seo -- auth` probes all three surfaces and prints these steps with
+the exact email when anything is missing.
+
+Overrides (env): `SEO_KEY_FILE`, `SEO_QUOTA_PROJECT`, `SEO_GA_PROPERTY`
+(skip discovery), `SEO_GSC_SITE`, `SEO_SITE_URL`, `SEO_GA_MEASUREMENT_ID`,
+`PSI_API_KEY`.

@@ -149,18 +149,27 @@ actions recommended. The next run reads the latest report for trend
 comparison — without it, "traffic is up" has no baseline. Keep reports
 factual and diff-friendly; they're committed with any fixes.
 
-## Setup (one-time, James only)
+## Setup
 
-`npm run seo -- auth` verifies access and prints exact remediation. Current
-known state: gcloud ADC exists but lacks Analytics/Search Console scopes.
-James must run the interactive commands the CLI prints (ADC re-login with
-scopes + enable the three APIs on the quota project). Also:
+Auth is a service account in the personal `jamesevans-au-seo` GCP project —
+kept deliberately separate from Audify, Kairos, and anything work-related.
+Full details and the reason gcloud ADC can't be used are in
+`reference/api-cheatsheet.md` ("Auth model").
 
-- Search Console: the property for jamesevans.au must exist and
-  jjme28@gmail.com must be an owner/user (`gsc sitemaps` will confirm).
-- Optional: `PSI_API_KEY` env var (free key, any GCP project with
-  `pagespeedonline.googleapis.com` enabled) makes `psi` reliable — the
-  keyless pool is often exhausted.
+`npm run seo -- auth` is the single source of truth on what works. Built and
+verified 25 Jul 2026: the service account authenticates, GA Admin returns
+ok, and `psi` runs on our own quota. **Two steps remain that only James can
+do**, because GCP IAM does not grant access to these products:
+
+1. **GA4** → Admin → Property access management → add
+   `seo-agent@jamesevans-au-seo.iam.gserviceaccount.com` as Editor
+   (Viewer works for read-only; Editor enables the GA management mode).
+2. **Search Console** → confirm a property for jamesevans.au exists, then
+   Settings → Users and permissions → add the same email as **Full** user
+   (Full is required for URL Inspection).
+
+Until then, GA data and GSC commands fail with a clear 403 naming the fix;
+`audit` and `psi` work regardless, since neither needs those grants.
 
 ## Cost control
 

@@ -1,46 +1,140 @@
 /**
- * Google API plumbing for the SEO CLI: auth via gcloud Application Default
- * Credentials, plus discovery of the GA4 property and Search Console site.
+ * Google API plumbing for the SEO CLI: auth via a dedicated service account,
+ * plus discovery of the GA4 property and Search Console site.
  *
- * Requires ADC with Analytics + Search Console scopes:
+ * Auth is a service-account key, NOT gcloud ADC. gcloud's shared OAuth client
+ * is blocked by Google from requesting Analytics and Search Console scopes
+ * ("This app is blocked"), so ADC can't work here regardless of consent.
  *
- *   gcloud auth application-default login \
- *     --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/analytics.edit,https://www.googleapis.com/auth/analytics.readonly,https://www.googleapis.com/auth/webmasters
+ * The account lives in its own personal GCP project, deliberately isolated
+ * from any client or employer project:
  *
- * The quota project (gcloud config: billing/quota_project) must have the
- * analyticsdata, analyticsadmin, and searchconsole APIs enabled.
+ *   project: jamesevans-au-seo
+ *   account: seo-agent@jamesevans-au-seo.iam.gserviceaccount.com
+ *   key:     ~/.config/jamesevans-au-seo/seo-agent.json  (mode 600, never in git)
+ *
+ * The account email must be granted access in the GA4 and Search Console UIs —
+ * IAM roles don't cover those products. `npm run seo -- auth` reports what's
+ * missing. Override the key path with SEO_KEY_FILE.
  *
  * Logs contain aggregate metrics, page paths, and search queries only —
  * never reader personal data.
  */
-import { execFileSync } from 'node:child_process';
+import { createSign } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 
 export const MEASUREMENT_ID =
   process.env.SEO_GA_MEASUREMENT_ID ?? 'G-QG6QKVZNG9';
 export const SITE_URL = process.env.SEO_SITE_URL ?? 'https://jamesevans.au/';
 
+/** Personal project that owns the service account and pays for API quota. */
+export const QUOTA_PROJECT =
+  process.env.SEO_QUOTA_PROJECT ?? 'jamesevans-au-seo';
+
+const CONFIG_DIR = join(homedir(), '.config', 'jamesevans-au-seo');
+
+export const KEY_FILE =
+  process.env.SEO_KEY_FILE ?? join(CONFIG_DIR, 'seo-agent.json');
+
+/** PageSpeed Insights takes an API key, not OAuth — it rejects the Analytics
+ *  scopes. Key is restricted to pagespeedonline and lives beside the SA key. */
+export function psiApiKey(): string | undefined {
+  if (process.env.PSI_API_KEY) return process.env.PSI_API_KEY;
+  const path = join(CONFIG_DIR, 'psi-api-key.txt');
+  return existsSync(path) ? readFileSync(path, 'utf8').trim() : undefined;
+}
+
+const SCOPES = [
+  'https://www.googleapis.com/auth/analytics.readonly',
+  'https://www.googleapis.com/auth/analytics.edit',
+  'https://www.googleapis.com/auth/webmasters',
+].join(' ');
+
 const GA_DATA = 'https://analyticsdata.googleapis.com/v1beta';
 const GA_ADMIN = 'https://analyticsadmin.googleapis.com/v1beta';
 const GSC = 'https://searchconsole.googleapis.com';
 
-let cachedToken: string | undefined;
+interface KeyFile {
+  client_email: string;
+  private_key: string;
+}
 
-export function accessToken(): string {
-  if (cachedToken) return cachedToken;
-  try {
-    cachedToken = execFileSync(
-      'gcloud',
-      ['auth', 'application-default', 'print-access-token'],
-      { encoding: 'utf8' },
-    ).trim();
-  } catch {
+export function serviceAccountEmail(): string {
+  return readKey().client_email;
+}
+
+function readKey(): KeyFile {
+  if (!existsSync(KEY_FILE)) {
     throw new Error(
-      'Could not get a Google access token. Run:\n' +
-        '  gcloud auth application-default login \\\n' +
-        '    --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/analytics.edit,https://www.googleapis.com/auth/analytics.readonly,https://www.googleapis.com/auth/webmasters',
+      `No service-account key at ${KEY_FILE}.\n` +
+        'Create one (personal project, nothing to do with client work):\n' +
+        `  gcloud iam service-accounts keys create ${KEY_FILE} \\\n` +
+        `    --iam-account=seo-agent@${QUOTA_PROJECT}.iam.gserviceaccount.com --project=${QUOTA_PROJECT}\n` +
+        'Or point SEO_KEY_FILE at an existing key.',
     );
   }
-  return cachedToken;
+  const key = JSON.parse(readFileSync(KEY_FILE, 'utf8')) as KeyFile;
+  if (!key.client_email || !key.private_key) {
+    throw new Error(
+      `${KEY_FILE} is not a valid service-account key JSON file.`,
+    );
+  }
+  return key;
+}
+
+const b64url = (input: string | Buffer) =>
+  Buffer.from(input).toString('base64url');
+
+let cached: { token: string; expiresAt: number } | undefined;
+
+/** Mint an access token by signing a JWT bearer assertion (RFC 7523).
+ *  Tokens last an hour; reuse within a run. */
+export async function accessToken(): Promise<string> {
+  if (cached && Date.now() < cached.expiresAt - 60_000) return cached.token;
+
+  const key = readKey();
+  const now = Math.floor(Date.now() / 1000);
+  const claims = {
+    iss: key.client_email,
+    scope: SCOPES,
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600,
+  };
+  const unsigned = `${b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))}.${b64url(
+    JSON.stringify(claims),
+  )}`;
+  const signature = createSign('RSA-SHA256')
+    .update(unsigned)
+    .sign(key.private_key)
+    .toString('base64url');
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: `${unsigned}.${signature}`,
+    }),
+  });
+  const body = (await res.json()) as {
+    access_token?: string;
+    expires_in?: number;
+    error_description?: string;
+    error?: string;
+  };
+  if (!res.ok || !body.access_token) {
+    throw new Error(
+      `Token exchange failed: ${body.error_description ?? body.error ?? res.status}`,
+    );
+  }
+  cached = {
+    token: body.access_token,
+    expiresAt: Date.now() + (body.expires_in ?? 3600) * 1000,
+  };
+  return cached.token;
 }
 
 export async function api(
@@ -51,7 +145,10 @@ export async function api(
   const res = await fetch(url, {
     method,
     headers: {
-      Authorization: `Bearer ${accessToken()}`,
+      Authorization: `Bearer ${await accessToken()}`,
+      // Bill quota to the personal SEO project, never to whichever project
+      // gcloud happens to have selected.
+      'x-goog-user-project': QUOTA_PROJECT,
       ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
@@ -61,8 +158,10 @@ export async function api(
   if (!res.ok) {
     const err = json.error as { message?: string; status?: string } | undefined;
     const hint =
-      err?.status === 'PERMISSION_DENIED'
-        ? '\nHint: the ADC token is missing scopes. Re-run the gcloud login command in scripts/seo/google.ts, and ensure the analyticsdata/analyticsadmin/searchconsole APIs are enabled on the quota project.'
+      res.status === 403 || res.status === 401
+        ? `\nHint: the service account (${readKey().client_email}) needs to be granted access in the product's own UI —` +
+          ' GA4 Admin → Property access management, and Search Console → Settings → Users and permissions.' +
+          ' GCP IAM roles do not grant Analytics or Search Console access.'
         : '';
     throw new Error(
       `${method} ${url} → ${res.status} ${err?.message ?? text}${hint}`,

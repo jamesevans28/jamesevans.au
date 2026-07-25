@@ -37,7 +37,11 @@ import {
   gsc,
   gscSite,
   propertyName,
+  psiApiKey,
+  serviceAccountEmail,
+  KEY_FILE,
   MEASUREMENT_ID,
+  QUOTA_PROJECT,
   SITE_URL,
 } from './google';
 import { runAudit } from './audit';
@@ -231,7 +235,8 @@ async function main() {
 
   switch (cmd) {
     case 'auth': {
-      accessToken();
+      const email = serviceAccountEmail();
+      await accessToken(); // fails loudly if the key is bad
       const checks: Record<string, string> = {};
       const probe = async (name: string, fn: () => Promise<unknown>) => {
         try {
@@ -251,14 +256,23 @@ async function main() {
         }),
       );
       await probe('search-console (webmasters)', () => gscSite());
-      out({ measurementId: MEASUREMENT_ID, siteUrl: SITE_URL, checks });
+      out({
+        serviceAccount: email,
+        quotaProject: QUOTA_PROJECT,
+        keyFile: KEY_FILE,
+        measurementId: MEASUREMENT_ID,
+        siteUrl: SITE_URL,
+        checks,
+      });
       if (Object.values(checks).some((v) => v !== 'ok')) {
         console.error(
-          '\nTo fix scope errors, James must run (interactive, opens a browser):\n\n' +
-            '  gcloud auth application-default login \\\n' +
-            '    --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/analytics.edit,https://www.googleapis.com/auth/analytics.readonly,https://www.googleapis.com/auth/webmasters\n\n' +
-            'and enable the APIs on the quota project:\n\n' +
-            '  gcloud services enable analyticsdata.googleapis.com analyticsadmin.googleapis.com searchconsole.googleapis.com\n',
+          '\nThe service account exists but still needs access granted in each product’s own UI\n' +
+            '(GCP IAM roles do not cover Analytics or Search Console). James must:\n\n' +
+            `  1. GA4 → Admin → Property access management → add ${email}\n` +
+            '     as Viewer (or Editor, to let the skill manage custom dimensions and key events).\n' +
+            `  2. Search Console → Settings → Users and permissions → add ${email}\n` +
+            '     as Full user (needed for the URL Inspection API).\n\n' +
+            'Then re-run: npm run seo -- auth\n',
         );
         process.exit(2);
       }
@@ -279,11 +293,20 @@ async function main() {
     case 'psi': {
       const url = sub ?? SITE_URL;
       const strategy = argv.includes('--mobile') ? 'mobile' : 'desktop';
+      // PSI wants an API key (it rejects the Analytics OAuth scopes). With the
+      // key, quota bills to the personal SEO project instead of the anonymous
+      // shared pool, which is routinely exhausted.
+      const key = psiApiKey();
+      if (!key)
+        fail(
+          'PageSpeed needs an API key. Expected ~/.config/jamesevans-au-seo/psi-api-key.txt ' +
+            'or PSI_API_KEY. Create one restricted to pagespeedonline.googleapis.com ' +
+            `on the ${QUOTA_PROJECT} project.`,
+        );
       const endpoint =
-        'https://www.googleapis.com/pagespeedonline/v5/runPagespeed' +
+        'https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed' +
         `?url=${encodeURIComponent(url)}&strategy=${strategy}` +
-        '&category=performance&category=seo' +
-        (process.env.PSI_API_KEY ? `&key=${process.env.PSI_API_KEY}` : '');
+        `&category=performance&category=seo&key=${key}`;
       const res = await fetch(endpoint);
       const data = (await res.json()) as {
         error?: { message?: string };

@@ -149,3 +149,9 @@ content-drafts/
 
 # Per-post OG images, regenerated from post data by the prebuild step
 public/og/blog/
+
+# Credentials — SEO service-account keys live in ~/.config/jamesevans-au-seo/,
+# never in the repo. These patterns are a safety net against accidental copies.
+*seo-agent*.json
+psi-api-key.txt
+service-account*.json
