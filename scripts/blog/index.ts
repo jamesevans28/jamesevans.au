@@ -35,18 +35,43 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import {
   postSchema,
+  briefSchema,
+  briefAction,
   lintBody,
   slugPattern,
   toItem,
   wordCount,
+  scoreTotal,
+  SCORE_MAX,
   type Post,
 } from '../../src/lib/blog-schema';
+import {
+  claimBrief,
+  existingTopics,
+  getBrief,
+  listBriefs,
+  nextBrief,
+  putBrief,
+  rejectBrief,
+  summarise,
+} from './briefs';
 
 const TABLE = process.env.BLOG_TABLE ?? 'jamesevans.au-blog';
 const REGION = process.env.AWS_REGION ?? 'ap-southeast-2';
 const DRAFTS_DIR = resolve(process.cwd(), 'content-drafts');
 
-const client = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }));
+const client = DynamoDBDocumentClient.from(
+  new DynamoDBClient({
+    region: REGION,
+    // Point at DynamoDB Local for testing: BLOG_ENDPOINT=http://localhost:8000
+    ...(process.env.BLOG_ENDPOINT
+      ? {
+          endpoint: process.env.BLOG_ENDPOINT,
+          credentials: { accessKeyId: 'local', secretAccessKey: 'local' },
+        }
+      : {}),
+  }),
+);
 
 // ---- helpers ------------------------------------------------------------
 
@@ -359,6 +384,199 @@ async function cmdPreview(slug?: string): Promise<void> {
 `);
 }
 
+// ---- brief queue --------------------------------------------------------
+
+/** Read all of stdin. Used by `brief add` so agents can pipe JSON in. */
+async function readStdin(): Promise<string> {
+  if (process.stdin.isTTY) {
+    fail('expected a JSON brief on stdin (pipe it in)');
+  }
+  const chunks: Buffer[] = [];
+  for await (const chunk of process.stdin) chunks.push(Buffer.from(chunk));
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+/**
+ * Queue a brief and report what should happen next. Exit codes let a scheduled
+ * run branch without parsing text:
+ *   0 = queued (nothing more to do now)
+ *   10 = write a post now, then stop for review
+ *   11 = write a post now and publish it
+ *   12 = discarded (vetoed on audience fit / angle / evidence)
+ */
+async function cmdBriefAdd(): Promise<void> {
+  const raw = await readStdin();
+  let json: unknown;
+  try {
+    json = JSON.parse(raw);
+  } catch (err) {
+    fail(`stdin is not valid JSON: ${err instanceof Error ? err.message : err}`);
+  }
+
+  const parsed = briefSchema.safeParse(json);
+  if (!parsed.success) {
+    console.error('\n  ✗ brief failed validation:\n');
+    for (const issue of parsed.error.issues) {
+      console.error(`      ${issue.path.join('.') || '(root)'}: ${issue.message}`);
+    }
+    console.error('');
+    process.exit(1);
+  }
+  const brief = parsed.data;
+
+  // Dedupe against posts and briefs we already have.
+  const existing = await existingTopics(client, TABLE);
+  const clash = existing.find(
+    (e) => e.id === brief.briefId || e.id === brief.suggestedSlug,
+  );
+  if (clash) {
+    fail(
+      `"${brief.briefId}" clashes with an existing ${clash.kind} (${clash.id}) — pick a new angle or update that one`,
+    );
+  }
+
+  const decision = briefAction(brief);
+
+  if (decision.action === 'discard') {
+    console.log(`\n  ✗ discarded (${decision.total}/${SCORE_MAX})`);
+    for (const reason of decision.reasons) console.log(`      ${reason}`);
+    console.log('');
+    process.exit(12);
+  }
+
+  await putBrief(client, TABLE, { ...brief, status: 'queued' });
+
+  console.log(`\n  ✓ queued "${brief.briefId}" — ${decision.total}/${SCORE_MAX}`);
+  for (const reason of decision.reasons) console.log(`      ${reason}`);
+
+  if (decision.action === 'queue') {
+    console.log('\n  Held for a later blog-post run.\n');
+    process.exit(0);
+  }
+  if (decision.action === 'write') {
+    console.log('\n  → Write this post now, then stop for review.\n');
+    process.exit(10);
+  }
+  console.log('\n  → Write AND publish this post now (evidence gate passed).\n');
+  process.exit(11);
+}
+
+/** Print the highest-scoring queued brief's markdown, for blog-post to read. */
+async function cmdBriefNext(args: string[]): Promise<void> {
+  const brief = await nextBrief(client, TABLE);
+  if (!brief) {
+    console.log('\n  no queued briefs\n');
+    process.exit(3);
+  }
+
+  if (args.includes('--json')) {
+    console.log(JSON.stringify(brief, null, 2));
+    return;
+  }
+
+  const decision = briefAction(brief);
+  console.log(`\n  ${brief.suggestedTitle}`);
+  console.log(`  brief: ${brief.briefId} · ${decision.total}/${SCORE_MAX} · ${brief.pillar} · ${brief.timeliness}`);
+  console.log(`  suggested slug: ${brief.suggestedSlug}`);
+  console.log(`  action: ${decision.action}`);
+  for (const reason of decision.reasons) console.log(`      ${reason}`);
+  console.log(`\n${brief.markdown}\n`);
+}
+
+async function cmdBriefList(args: string[]): Promise<void> {
+  const status = args.includes('--used')
+    ? 'used'
+    : args.includes('--rejected')
+      ? 'rejected'
+      : 'queued';
+
+  const briefs = await listBriefs(client, TABLE, status);
+  if (briefs.length === 0) {
+    console.log(`\n  no ${status} briefs\n`);
+    return;
+  }
+
+  console.log(`\n  ${status} briefs, best first:\n`);
+  for (const brief of briefs) {
+    console.log(`  ${summarise(brief)}`);
+    console.log(`         ${brief.suggestedTitle}`);
+    if (brief.usedBySlug) console.log(`         → used by /blog/${brief.usedBySlug}/`);
+  }
+  console.log(`\n  ${briefs.length} brief(s)\n`);
+}
+
+async function cmdBriefShow(briefId?: string): Promise<void> {
+  if (!briefId) fail('usage: npm run blog -- brief show <briefId>');
+  const brief = await getBrief(client, TABLE, briefId);
+  if (!brief) fail(`no brief "${briefId}"`);
+  console.log(`\n${brief.markdown}\n`);
+  console.log(`  score: ${scoreTotal(brief.scores)}/${SCORE_MAX}`);
+  console.log(`  scores: ${JSON.stringify(brief.scores)}`);
+  if (brief.doNotClaim.length > 0) {
+    console.log('\n  Do not claim:');
+    for (const item of brief.doNotClaim) console.log(`      - ${item}`);
+  }
+  console.log('');
+}
+
+async function cmdBriefClaim(briefId?: string, slug?: string): Promise<void> {
+  if (!briefId || !slug) {
+    fail('usage: npm run blog -- brief claim <briefId> <postSlug>');
+  }
+  const claimed = await claimBrief(client, TABLE, briefId, slug);
+  if (!claimed) {
+    fail(`"${briefId}" was already claimed by another run — pick the next brief`);
+  }
+  ok(`"${briefId}" marked used by ${slug}`);
+}
+
+async function cmdBriefReject(briefId?: string): Promise<void> {
+  if (!briefId) fail('usage: npm run blog -- brief reject <briefId>');
+  const brief = await getBrief(client, TABLE, briefId);
+  if (!brief) fail(`no brief "${briefId}"`);
+  await rejectBrief(client, TABLE, briefId);
+  ok(`"${briefId}" rejected — it won't be offered again`);
+}
+
+/** Topics already covered, so a research run can dedupe. */
+async function cmdBriefTopics(): Promise<void> {
+  const topics = await existingTopics(client, TABLE);
+  if (topics.length === 0) {
+    console.log('\n  nothing covered yet\n');
+    return;
+  }
+  console.log('');
+  for (const t of topics) {
+    console.log(`  ${t.kind.padEnd(5)} ${t.id}`);
+    if (t.text) console.log(`        ${t.text}`);
+  }
+  console.log(`\n  ${topics.length} existing topic(s) — avoid duplicating these\n`);
+}
+
+async function cmdBrief(args: string[]): Promise<void> {
+  const [sub, ...rest] = args;
+  switch (sub) {
+    case 'add':
+      return cmdBriefAdd();
+    case 'next':
+      return cmdBriefNext(rest);
+    case 'list':
+      return cmdBriefList(rest);
+    case 'show':
+      return cmdBriefShow(rest[0]);
+    case 'claim':
+      return cmdBriefClaim(rest[0], rest[1]);
+    case 'reject':
+      return cmdBriefReject(rest[0]);
+    case 'topics':
+      return cmdBriefTopics();
+    default:
+      fail(
+        'usage: npm run blog -- brief <add|next|list|show|claim|reject|topics>',
+      );
+  }
+}
+
 // ---- entry --------------------------------------------------------------
 
 const [command, ...rest] = process.argv.slice(2);
@@ -372,6 +590,7 @@ const commands: Record<string, () => void | Promise<void>> = {
   list: () => cmdList(rest),
   lint: () => cmdLint(rest[0]),
   preview: () => cmdPreview(rest[0]),
+  brief: () => cmdBrief(rest),
 };
 
 if (!command || command === 'help' || !commands[command]) {
@@ -386,6 +605,16 @@ if (!command || command === 'help' || !commands[command]) {
     npm run blog -- list [--drafts]     list posts
     npm run blog -- lint [file|slug]    validate only
     npm run blog -- preview <slug>      set up a local preview
+
+  Research brief queue (used by the scheduled blog-research runs)
+
+    npm run blog -- brief add           queue a JSON brief from stdin
+    npm run blog -- brief next [--json] highest-scoring queued brief
+    npm run blog -- brief list [--used|--rejected]
+    npm run blog -- brief show <id>     print a brief
+    npm run blog -- brief claim <id> <postSlug>
+    npm run blog -- brief reject <id>
+    npm run blog -- brief topics        what's already covered (dedupe)
 
   Table: ${TABLE} (${REGION})
 `);

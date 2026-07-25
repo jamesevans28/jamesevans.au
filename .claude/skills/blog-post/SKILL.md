@@ -9,16 +9,39 @@ The blog is **"AI, in plain English."** Practical writing about AI in everyday
 life, for everyday people and small businesses. Posts are stored in DynamoDB and
 prerendered as static HTML at deploy time.
 
-## Never publish without explicit approval
+## When you may publish
 
-Publishing puts content on a public site under James's name. Always:
+Publishing puts content on a public site under James's name. The default is
+always: **draft, show him, wait.**
 
 1. Write and push as a **draft**.
 2. Show James the draft (summarise it, and offer the preview URL).
 3. Publish **only** after he says to.
 
-Never run `publish` on your own initiative, even if the request sounded like
-"write and publish something about X" — draft it, then confirm.
+Never run `publish` on your own initiative when a human is in the loop, even if
+the request sounded like "write and publish something about X" — draft it, then
+confirm.
+
+### The one exception: an auto-publish brief
+
+James has approved unattended publishing for briefs that clear a high bar. You
+may publish without asking **only** when all of these hold:
+
+- The work came from a queued brief, and
+- `npm run blog -- brief next` (or `brief add`) reported the action
+  **`write-and-publish`** — equivalently `brief add` exited `11`, and
+- `npm run blog -- lint` passes with **no** problems, and
+- Every statistic you used came from the brief's `facts`, with its attribution,
+  and none is marked `conflicting`, and
+- You made no claim listed in the brief's `doNotClaim`.
+
+If **any** of those fails — including "the draft ended up needing a figure the
+brief didn't have" — push the draft and stop for review. Downgrading to a draft
+is always the safe choice and never the wrong one. Say clearly in your summary
+which path you took and why.
+
+Do not re-score a brief or re-derive the gate yourself. The CLI owns that
+decision; you only act on what it reported.
 
 ## Audience and voice
 
@@ -86,10 +109,32 @@ Every post should fit one of these (they map to the tag taxonomy):
 
 ## Starting from a research brief
 
-If a brief exists at `content-drafts/research/<date>-<slug>.md` (produced by the
-`blog-research` skill), **read it first and write from it.** It carries the
-search phrasings to target, verified statistics with sources, reader pain points,
-tools to mention, and the differentiator.
+Briefs are queued in DynamoDB by the `blog-research` skill. To write the next
+one:
+
+```bash
+# Highest-scoring queued brief, with its action and full markdown
+npm run blog -- brief next
+
+# Or a specific one
+npm run blog -- brief show <briefId>
+
+# JSON, when you want the facts array verbatim
+npm run blog -- brief next --json
+```
+
+`brief next` exits `3` when the queue is empty — report that and stop; don't
+invent a topic to fill the slot.
+
+**Claim the brief as soon as you've chosen the post slug**, before writing:
+
+```bash
+npm run blog -- brief claim <briefId> <postSlug>
+```
+
+This is conditional: if another scheduled run already claimed it, the command
+fails and you should move to the next brief. Claiming first is what stops two
+runs writing the same article.
 
 Rules when working from a brief:
 
@@ -106,15 +151,29 @@ Rules when working from a brief:
 If James asks for a post on a topic with **no brief**, say a brief would make it
 stronger and offer to run `blog-research` first. If he'd rather go straight to
 drafting, do it — but then write only from what you can state without inventing
-evidence, and keep statistics out unless you verify them as you go.
+evidence, and keep statistics out unless you verify them as you go. A post
+written without a brief is **never** eligible for auto-publishing.
+
+## Running unattended
+
+When invoked by a schedule rather than by James:
+
+- Never ask questions. If something is ambiguous, take the safe path (draft, not
+  publish) and note it in the summary.
+- Write **one** post per run.
+- Claim the brief before writing, and if the claim fails, take the next brief
+  rather than pressing on.
+- Always finish with a summary: which brief, which slug, draft or published, and
+  anything that made you downgrade from publish to draft.
 
 ## Workflow
 
 ```bash
-# 0. If a brief exists, read it first
-#    content-drafts/research/<date>-<slug>.md
+# 0. Take the next brief (note its action: write / write-and-publish)
+npm run blog -- brief next
 
-# 1. Scaffold
+# 1. Claim it, then scaffold
+npm run blog -- brief claim <briefId> how-to-use-ai-to-write-better-emails
 npm run blog -- draft how-to-use-ai-to-write-better-emails
 
 # 2. Write the post in content-drafts/<slug>.md, then check it
@@ -123,10 +182,12 @@ npm run blog -- lint how-to-use-ai-to-write-better-emails
 # 3. Save to DynamoDB as a draft
 npm run blog -- push how-to-use-ai-to-write-better-emails
 
-# 4. Preview locally and review the rendered page yourself
+# 4. Review the rendered page yourself
 npm run dev     # then open http://localhost:3000/blog/<slug>/
 
-# 5. ONLY after James approves
+# 5a. Normal path: stop here and show James the draft.
+# 5b. Auto-publish path ONLY (brief action was write-and-publish, lint clean,
+#     every figure sourced from the brief):
 npm run blog -- publish how-to-use-ai-to-write-better-emails
 ```
 

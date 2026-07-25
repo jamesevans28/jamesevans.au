@@ -1,20 +1,20 @@
 # jamesevans.au — Blog Section Plan
 
 **Author:** Claude (planning session, 25 July 2026)
-**Status:** Phases B1–B4 built (25 July 2026). Not yet deployed — see "Before first deploy" below.
+**Status:** Phases B1–B4 + scheduled operation built (25 July 2026). Not yet deployed — see "Before first deploy" below.
 **Depends on:** the existing site (see `docs/PLAN.md`, Phases 0–4 built)
 
 ---
 
 ## Build status (B1–B4 complete)
 
-Verified locally: **lint + typecheck + 156 tests + static export all green**, all four CDK stacks synthesize.
+Verified locally: **lint + typecheck + 195 tests + static export all green**, all four CDK stacks synthesize.
 
 - **B1** — `infra/lib/blog-stack.ts`: DynamoDB `jamesevans.au-blog` (on-demand, `by-status` GSI, PITR, deletion protection, RETAIN) in ap-southeast-2; deploy role granted read-only (`Query`/`GetItem`/`BatchGetItem`) on the table + indexes. Validation in `src/lib/blog-schema.ts` (zod), build-time data layer in `src/lib/blog.ts`. ✅
 - **B2** — `/blog` index + `/blog/[slug]` articles, markdown pipeline (`src/lib/markdown.ts`: remark/rehype + Shiki, sanitised), `.prose-volt` theme in `globals.css`, `PostCard`, on-page table of contents, related posts, Blog nav link. ✅
 - **B3** — Per-post `generateMetadata` (canonical, OpenGraph `article`, Twitter card), `BlogPosting` + `Blog` + `BreadcrumbList` JSON-LD, per-post OG images (`scripts/generate-blog-og.mjs`, wired to `prebuild`), sitemap entries with real `lastModified`, RSS at `/feed.xml`. ✅
 - **B4** — `scripts/blog/index.ts` CLI (`draft`/`pull`/`push`/`publish`/`unpublish`/`list`/`lint`/`preview`), `repository_dispatch: blog-publish` on the deploy workflow, authoring skill at `.claude/skills/blog-post/SKILL.md`. ✅
-- **B4a** — Topic research skill at `.claude/skills/blog-research/SKILL.md`: searches five angles (search demand, new tools, reader pain points, trending discussion, Australian angle), verifies statistics to their primary source, scores 5–8 candidates, and writes a structured brief to `content-drafts/research/<date>-<slug>.md` that `blog-post` consumes. Worked example at `reference/example-brief.md`. ✅
+- **B4a** — Topic research skill at `.claude/skills/blog-research/SKILL.md`: searches five angles (search demand, new tools, reader pain points, trending discussion, Australian angle), verifies statistics to their primary source, scores 5–8 candidates, and queues a structured brief in DynamoDB (see §11) that `blog-post` consumes. Worked example at `reference/example-brief.md`. ✅
 
 ### Decisions made during the build
 
@@ -32,17 +32,6 @@ Verified locally: **lint + typecheck + 156 tests + static export all green**, al
 2. Set the `BLOG_TABLE` GitHub repo variable to `jamesevans.au-blog`.
 3. Grant James's local AWS profile read/write on the table (the CLI writes; CI never does).
 4. Find a topic (`blog-research` skill), then write it (`blog-post` skill) — or go straight to `npm run blog -- draft <slug>`.
-
-### Topic research → draft handoff
-
-`blog-research` → brief in `content-drafts/research/` → `blog-post` → draft in DynamoDB → James approves → publish.
-
-The brief is the contract between the two skills. It carries verified statistics **with source URLs, dates, and geography**, the exact phrasings people search, reader pain points, tools worth mentioning, and a `Do not claim` list of statements that failed verification. `blog-post` may only use figures from the brief's table, with the attribution given.
-
-Two rules came out of testing the research process on live searches:
-
-- **AI adoption statistics contradict each other constantly.** A real run turned up 74% (US, "using or testing"), 28% (US, "adoption"), and 43–44% (Australia, National AI Centre) for what reads like the same question. The skill records conflicts as `CONFLICTING` with both sources rather than picking one, because the differences are definitional (*ever tried* vs *uses regularly* vs *embedded across the business*).
-- **Statistics must be followed to their primary source.** The widely-quoted 74% figure turns out to be a US-only survey (Centiment for Bluevine, n=942, April 2026) — quoting it as an Australian fact would have been wrong. Round-up blogs routinely drop the geography and date.
 
 ---
 
@@ -209,3 +198,39 @@ Rough effort: B1–B4 is one focused build session each, same shape as the origi
 2. **Comments: no.** Readers reply via /contact.
 3. **Syndication: no LinkedIn. Twitter/X — maybe.** Plan for it as an optional B5 item: on publish, the CLI can post a link tweet (title + hook + URL) via the X API. Content always lives canonically on jamesevans.au — X only ever gets a link, never the full text. Not built until James says go; the schema's `canonicalUrl` field remains for any future syndication.
 4. **Tooling: confirmed** — `gh` CLI and AWS SSO profiles are set up on the authoring machine.
+
+---
+
+## 11. Scheduled operation (built 25 July 2026)
+
+The researcher runs unattended every ~12 hours; `blog-post` runs on a slower cadence and picks the best queued brief. Briefs therefore need durable, shared storage rather than local files.
+
+**Storage.** Briefs are items in the existing `jamesevans.au-blog` table with `pk='BRIEF'`, indexed on `by-status` as `gsi1pk='BRIEF#<status>'` and `gsi1sk='<zero-padded score>#<researchedAt>'`. "Highest-scoring queued brief" is one descending `Query` with `Limit=1`. Briefs cannot collide with posts: the site build queries `gsi1pk='published'`, a partition briefs never occupy, and a brief item fails `postSchema` anyway — both asserted in `src/lib/briefs.test.ts`; queue access is covered in `src/lib/brief-queue.test.ts`.
+
+**Scoring.** Six criteria (`searchDemand`, `audienceFit`, `engagement`, `ourAngle`, `durability`, `evidence`), each 1–5, total out of 30. `briefAction()` in `src/lib/blog-schema.ts` is the single source of truth for what happens:
+
+| Total | Action | CLI exit |
+|---|---|---|
+| any, with ≤2 on `audienceFit`/`ourAngle`/`evidence` | `discard` — vetoed | 12 |
+| < 22 | `queue` for a later run | 0 |
+| 22–25 | `write` a draft, stop for review | 10 |
+| 26–30 **and** evidence gate passes | `write-and-publish` | 11 |
+
+**The evidence gate.** James approved unattended publishing above a high bar, so the gate deliberately depends on evidence quality rather than the topic score alone — the risk of publishing unreviewed isn't clumsy prose, it's a misattributed statistic going public under his name. A 26+ brief is downgraded to a draft if any fact is `conflicting`, any fact is not traced to a primary source, `evidence` is below 5, or the topic is `newsy` (a launch claim can be overtaken between research and publish). Verified end to end: a 30/30 brief with one `conflicting` fact drops from exit 11 to exit 10.
+
+**Concurrency.** `brief claim` is a conditional update requiring `status = 'queued'`, so two overlapping scheduled runs cannot write the same post — the loser is told to take the next brief.
+
+**Dedupe.** `brief topics` lists every existing post and brief (queued and used); `brief add` rejects a clashing `briefId` or `suggestedSlug`. Without this, a twice-daily researcher would re-queue the same trends indefinitely.
+
+**Local testing.** Set `BLOG_ENDPOINT=http://localhost:8000` to point the CLI at DynamoDB Local.
+
+### Topic research → draft handoff
+
+`blog-research` → brief queued in DynamoDB (§11) → `blog-post` → draft in DynamoDB → James approves → publish. Above the auto-publish bar, the last two steps collapse into one automatic run.
+
+The brief is the contract between the two skills. It carries verified statistics **with source URLs, dates, and geography**, the exact phrasings people search, reader pain points, tools worth mentioning, and a `Do not claim` list of statements that failed verification. `blog-post` may only use figures from the brief's table, with the attribution given.
+
+Two rules came out of testing the research process on live searches:
+
+- **AI adoption statistics contradict each other constantly.** A real run turned up 74% (US, "using or testing"), 28% (US, "adoption"), and 43–44% (Australia, National AI Centre) for what reads like the same question. The skill records conflicts as `CONFLICTING` with both sources rather than picking one, because the differences are definitional (*ever tried* vs *uses regularly* vs *embedded across the business*).
+- **Statistics must be followed to their primary source.** The widely-quoted 74% figure turns out to be a US-only survey (Centiment for Bluevine, n=942, April 2026) — quoting it as an Australian fact would have been wrong. Round-up blogs routinely drop the geography and date.

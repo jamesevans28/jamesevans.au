@@ -9,40 +9,73 @@ The blog is **"AI, in plain English."** — practical AI writing for everyday pe
 and small businesses (full audience and voice spec in the `blog-post` skill).
 This skill decides *what* to write; `blog-post` decides *how* to write it.
 
-**Output:** a research brief at `content-drafts/research/<date>-<slug>.md`, plus a
-shortlist shown to James. The brief is the handoff — `blog-post` reads it and
-writes from it. Never draft the article in this skill.
+**Output:** a scored brief queued in DynamoDB via `npm run blog -- brief add`.
+The CLI scores it, dedupes it, and tells you what happens next. `blog-post`
+later reads the queue and writes from the highest-scoring brief.
+
+This skill runs **unattended on a schedule (every ~12 hours)** as well as
+interactively, so it must never block waiting for input — see "Unattended runs"
+below.
 
 ## Non-negotiables
 
 - **Every factual claim in the brief carries a source URL.** If it has no URL, it
   does not go in the brief. `blog-post` is forbidden from inventing statistics,
   so anything unsourced here becomes unusable there.
-- **Never publish anything.** This skill only reads the web and writes local
-  files. Topic selection and drafting both need James's input.
 - **Verify contested numbers.** Adoption and usage statistics about AI
   contradict each other constantly (see "Handling conflicting data" below).
 - Note the **date and geography** of every statistic. A 2024 US survey is not
   evidence about Australian small business in 2026.
+- **Score honestly.** The score decides whether a post gets written and possibly
+  published with nobody reviewing it. Inflating `evidence` or `ourAngle` to push
+  a topic through is the one failure mode that can put a wrong claim on a live
+  page under James's name. When unsure, score lower.
+- **This skill never publishes.** It queues briefs and may hand off to
+  `blog-post`; the publish decision belongs to the gate in the CLI (and to
+  James).
 
-## Step 1 — Scope the run
+## Unattended runs
 
-Ask James only if it's ambiguous; otherwise infer and say what you assumed:
+When running on a schedule there is nobody to answer questions. So:
+
+- **Never ask questions.** Infer the scope, state your assumptions in the run
+  summary, and continue.
+- **Always dedupe first** (step 1). A researcher running twice a day will keep
+  rediscovering the same trends; queueing near-duplicates is the main way this
+  becomes useless.
+- **Queue at most 2 briefs per run.** Better one well-verified brief than four
+  thin ones, and the queue is meant to stay readable.
+- **If nothing clears the bar, queue nothing and say so.** A quiet run is a
+  correct outcome — the web does not produce a great AI topic every 12 hours.
+- Keep it to roughly 12–18 searches and 3–6 fetches (see "Cost control").
+
+## Step 1 — Scope, and dedupe first
+
+**Always start here.** One command lists every post and brief that already
+exists, so you don't spend a whole run rediscovering a covered topic:
+
+```bash
+npm run blog -- brief topics
+```
+
+Treat a topic as a duplicate if it would answer substantially the same reader
+question — not just if the slug matches. "Five ways to use AI in a small
+business" and "AI tools every small business should try" are the same post.
+
+Also check what's already waiting, so you don't pile up near-identical briefs:
+
+```bash
+npm run blog -- brief list
+```
+
+Scope (infer it; only ask if running interactively and it's genuinely unclear):
 
 - **Pillar focus?** Any of `guides`, `tips`, `small-business`, `personal`,
   `trends`, `commentary` — or open.
-- **Timeliness?** *Newsy* (a launch or trend from the last two weeks, publish
-  this week) or *evergreen* (a guide that ranks for months). Default: mix both in
-  the shortlist and let him choose.
-
-Then check what already exists so you don't propose a duplicate:
-
-```bash
-npm run blog -- list
-```
-
-Also skim `content-drafts/research/` for briefs from previous runs — a topic
-already researched and rejected shouldn't come back without a reason.
+- **Timeliness?** *Newsy* (a launch or trend from the last two weeks) or
+  *evergreen* (a guide that ranks for months). Default to a mix.
+  Note: **newsy briefs never auto-publish**, by design — a launch claim can be
+  overtaken between research and publication.
 
 ## Step 2 — Search across all five angles
 
@@ -136,48 +169,62 @@ When sources conflict:
 
 ## Step 4 — Score the candidates
 
-Build 5–8 candidates, then score each 1–5 on:
+Build 5–8 candidates, then score each criterion **1–5** (total out of 30). The
+score is not decorative — it decides what happens automatically:
 
-| Criterion | What a 5 looks like |
+| Total | What happens |
 |---|---|
-| **Search demand** | People are visibly searching this, in volume |
-| **Audience fit** | Squarely everyday-person / small-business, non-technical |
-| **Engagement** | A real problem or a genuine surprise, not a rehash |
-| **Our angle** | James can say something most coverage doesn't — practical detail, Australian context, or an honest "this doesn't work" |
-| **Durability** | Still useful in six months (down-weight if newsy is wanted) |
-| **Evidence** | Enough verified, sourced material to write it without inventing anything |
+| < 22 | Queued for later; `blog-post` may pick it up on its own schedule |
+| 22–25 | A post is **written now** as a draft, then stops for review |
+| 26–30 | Written now **and published live without review** — but only if the evidence gate passes |
 
-Drop anything scoring 1–2 on **Audience fit**, **Our angle**, or **Evidence** —
-regardless of total. A high-traffic topic we have nothing distinctive to say
-about is a bad post, and one we can't source is unwritable.
+### The criteria
 
-Present the shortlist as a compact table (topic, pillar, total score, one-line
-angle, newsy/evergreen), recommend one, and say why. Then **stop and let James
-choose** — don't write the brief for all of them.
+| Criterion | What a 5 looks like | What a 1–2 looks like |
+|---|---|---|
+| `searchDemand` | People are visibly searching this, with volume figures to show it | No evidence anyone searches it |
+| `audienceFit` | Squarely everyday-person / small-business, non-technical | Needs developer knowledge **(vetoes)** |
+| `engagement` | A real problem or genuine surprise | A rehash of what everyone published last month |
+| `ourAngle` | James can say what others don't — practical detail, Australian context, an honest "this doesn't work" | Nothing to add beyond summarising others **(vetoes)** |
+| `durability` | Still useful in six months | Stale in a fortnight (fine for `newsy`, score it honestly) |
+| `evidence` | Multiple primary sources, no contradictions, nothing unverified | Thin or unverifiable **(vetoes)** |
 
-## Step 5 — Write the brief for the chosen topic
+**A 1–2 on `audienceFit`, `ourAngle`, or `evidence` discards the topic outright**,
+whatever the total. The CLI enforces this — a popular topic we can't source or
+say anything distinctive about is not worth writing.
 
-Write to `content-drafts/research/<YYYY-MM-DD>-<slug>.md`. This directory is
-gitignored (it sits under `content-drafts/`), so briefs stay local.
+### The evidence gate (why a 30/30 might still not publish)
+
+Scoring 26+ is necessary but not sufficient for auto-publishing. The CLI also
+requires:
+
+- **No fact marked `conflicting`** — a human decides how to frame contested data.
+- **Every fact traced to a primary source** (`primarySource: true`).
+- **`evidence` scored exactly 5.**
+- **`timeliness` is `evergreen`**, not `newsy`.
+
+Any one of those failing downgrades the action to "write a draft, then stop for
+review". This is deliberate: the real risk of unattended publishing isn't clumsy
+prose, it's a misattributed statistic going public. Don't try to work around it
+by marking a fact `primarySource: true` when you only saw it in a round-up blog.
+
+### Reporting
+
+Interactively: present a compact shortlist table, recommend one, and let James
+choose. Unattended: pick the best 1–2 yourself and queue them.
+
+## Step 5 — Write the brief markdown
 
 A **worked example built from real searches** lives at
 `reference/example-brief.md` (in this skill's directory) — read it to see the
 expected level of detail, and especially how conflicting evidence and failed
 verifications are recorded.
 
-Use this exact structure — `blog-post` expects these headings:
+Use this exact structure — `blog-post` expects these headings. (This markdown
+becomes the `markdown` field of the JSON in step 6; no frontmatter needed, since
+the metadata travels as JSON fields.)
 
 ```markdown
----
-researched: 2026-07-25
-topic: Getting AI to write emails that don't sound like AI
-pillar: guides
-suggested_slug: ai-emails-that-dont-sound-like-ai
-suggested_title: How to Stop Your AI Emails Sounding Like a Robot
-timeliness: evergreen
-confidence: high
----
-
 ## Why this topic
 
 Two or three sentences: the reader problem, and why now.
@@ -233,18 +280,74 @@ Mark any contested claim `CONFLICTING` and give both figures with both sources.
 - Every URL used, as a flat list.
 ```
 
-## Step 6 — Hand off
+## Step 6 — Queue the brief
 
-Tell James the brief is ready and give him the exact next step:
+Build the JSON below and pipe it to the CLI. It validates the brief, rejects
+duplicates, scores it, saves it, and tells you what to do next.
 
+```bash
+cat <<'JSON' | npm run --silent blog -- brief add
+{
+  "briefId": "ai-emails-that-dont-sound-like-ai",
+  "topic": "Getting AI to write emails that don't sound like AI",
+  "pillar": "guides",
+  "suggestedTitle": "How to Stop Your AI Emails Sounding Like a Robot",
+  "suggestedSlug": "ai-emails-that-dont-sound-like-ai",
+  "timeliness": "evergreen",
+  "scores": {
+    "searchDemand": 5, "audienceFit": 5, "engagement": 4,
+    "ourAngle": 4, "durability": 5, "evidence": 4
+  },
+  "markdown": "## Why this topic\n\n...the full brief from step 5...",
+  "facts": [
+    {
+      "claim": "Australian SME AI adoption",
+      "value": "43%",
+      "sourceUrl": "https://www.ai.gov.au/news-and-insights/blog/...",
+      "sourceDate": "Feb 2026",
+      "geography": "AU",
+      "conflicting": false,
+      "primarySource": true
+    }
+  ],
+  "doNotClaim": [
+    "Do not present the 74% figure as Australian — it is US-only"
+  ],
+  "sources": ["https://www.ai.gov.au/...", "https://..."],
+  "researchedAt": "2026-07-25T09:00:00.000Z"
+}
+JSON
 ```
-Brief: content-drafts/research/2026-07-25-ai-emails-that-dont-sound-like-ai.md
 
-To draft it:  use the blog-post skill with that brief
-```
+Field notes:
 
-`blog-post` then does the writing, and still requires James's explicit approval
-before anything is published.
+- `facts` — one entry per statistic. `primarySource` is `true` only when you
+  fetched the study/vendor/regulator page itself, not a blog quoting it.
+  `conflicting` is `true` when sources disagree.
+- `doNotClaim` — every statement that failed verification. `blog-post` treats
+  this as binding.
+- `markdown` — the full brief from step 5 (escape newlines as `\n` in JSON, or
+  write the JSON to a temp file and pipe that file in, which is easier).
+
+### Act on the exit code
+
+| Exit | Meaning | What you do |
+|---|---|---|
+| `0` | Queued, below the write threshold | Nothing. Report it and finish. |
+| `10` | **Write the post now**, then stop | Hand off to `blog-post` for this brief. It drafts and stops for review. |
+| `11` | **Write and publish now** (gate passed) | Hand off to `blog-post`, which drafts, verifies, and publishes. |
+| `12` | Discarded (vetoed) | Nothing was saved. Report why and move on. |
+| `1` | Validation or duplicate error | Fix and retry, or drop the topic. |
+
+On `10` or `11`, invoke the `blog-post` skill with that `briefId` in the same
+run — that's the whole point of the immediate path. On `11`, tell `blog-post`
+explicitly that the auto-publish gate passed.
+
+### Run summary
+
+Finish every run — including quiet ones — with a short summary: what you
+searched, what you queued with scores, what you discarded and why, and any
+handoff you triggered. This is the only record James has of an unattended run.
 
 ## Cost control
 

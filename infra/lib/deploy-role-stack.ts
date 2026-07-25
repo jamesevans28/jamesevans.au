@@ -65,9 +65,11 @@ export class DeployRoleStack extends cdk.Stack {
       }),
     );
 
-    // Read-only on the blog table: the build prerenders published posts.
-    // CI must never be able to write content — publishing is a local,
-    // credentialed action by James alone (docs/BLOG_PLAN.md §4).
+    // Read-only on the blog table: the build prerenders published posts. The
+    // table also holds research briefs (pk='BRIEF'), which the build never
+    // reads — they sit in their own index partition (docs/BLOG_PLAN.md §11).
+    // CI must never be able to write content: posts and briefs are both
+    // written with James's own credentials (docs/BLOG_PLAN.md §4).
     role.addToPolicy(
       new iam.PolicyStatement({
         sid: 'ReadBlogContent',

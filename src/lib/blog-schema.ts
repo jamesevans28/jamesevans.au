@@ -91,6 +91,197 @@ export function toItem(post: Post): PostItem {
   };
 }
 
+/* ------------------------------------------------------------------ *
+ * Research briefs
+ *
+ * The blog-research skill runs unattended on a schedule and queues briefs
+ * here; blog-post later picks the highest-scoring unused one. Both live in
+ * the same table (pk='BRIEF') so a scheduled run on any machine sees the same
+ * queue. See docs/BLOG_PLAN.md §11.
+ * ------------------------------------------------------------------ */
+
+/** The six criteria from the research skill, each scored 1-5. */
+export const scoreSchema = z.object({
+  searchDemand: z.number().int().min(1).max(5),
+  audienceFit: z.number().int().min(1).max(5),
+  engagement: z.number().int().min(1).max(5),
+  ourAngle: z.number().int().min(1).max(5),
+  durability: z.number().int().min(1).max(5),
+  evidence: z.number().int().min(1).max(5),
+});
+
+export type Scores = z.infer<typeof scoreSchema>;
+
+/** Max achievable total, used for thresholds and display. */
+export const SCORE_MAX = 30;
+
+/**
+ * Write a post immediately at or above this total. Chosen so a topic must be
+ * strong on most criteria, not merely high-traffic.
+ */
+export const WRITE_THRESHOLD = 22;
+
+/**
+ * Publish without review at or above this total — AND only when the evidence
+ * gate below passes. Deliberately high: unreviewed content goes public under
+ * James's name.
+ */
+export const AUTOPUBLISH_THRESHOLD = 26;
+
+/** Criteria that veto a topic outright when weak, regardless of total. */
+const VETO_CRITERIA = ['audienceFit', 'ourAngle', 'evidence'] as const;
+
+export function scoreTotal(scores: Scores): number {
+  return Object.values(scores).reduce((sum, n) => sum + n, 0);
+}
+
+/** A single verified statistic from the brief's evidence table. */
+export const factSchema = z.object({
+  claim: z.string().min(3),
+  value: z.string().min(1),
+  sourceUrl: z.url(),
+  /** ISO date or a coarse label like "Apr 2026" — as published. */
+  sourceDate: z.string().min(4),
+  /** e.g. "AU", "US", "global". Wrong geography is a real failure mode. */
+  geography: z.string().min(2),
+  /** True when sources disagree; the post must attribute both or omit it. */
+  conflicting: z.boolean().default(false),
+  /** True when traced to the study/vendor/regulator, not a round-up blog. */
+  primarySource: z.boolean().default(false),
+});
+
+export type Fact = z.infer<typeof factSchema>;
+
+export const briefSchema = z.object({
+  /** Slug of the brief itself; the post may choose a different one. */
+  briefId: z
+    .string()
+    .min(3)
+    .max(80)
+    .regex(slugPattern, 'must be lowercase kebab-case'),
+  topic: z.string().min(10).max(200),
+  pillar: z.enum(tagValues),
+  suggestedTitle: z.string().min(10).max(TITLE_MAX),
+  suggestedSlug: z
+    .string()
+    .min(3)
+    .max(80)
+    .regex(slugPattern, 'must be lowercase kebab-case'),
+  timeliness: z.enum(['newsy', 'evergreen']),
+  scores: scoreSchema,
+  /** Full markdown brief, following the template in the research skill. */
+  markdown: z.string().min(200),
+  facts: z.array(factSchema).default([]),
+  /** Claims that failed verification; the post must not make them. */
+  doNotClaim: z.array(z.string()).default([]),
+  sources: z.array(z.url()).min(1),
+  status: z.enum(['queued', 'used', 'rejected']).default('queued'),
+  researchedAt: isoDate,
+  /** Set when a post is written from this brief. */
+  usedAt: isoDate.optional(),
+  usedBySlug: z.string().optional(),
+});
+
+export type Brief = z.infer<typeof briefSchema>;
+
+export const briefItemSchema = briefSchema.safeExtend({
+  pk: z.literal('BRIEF'),
+  sk: z.string(),
+  gsi1pk: z.string(),
+  gsi1sk: z.string(),
+});
+
+export type BriefItem = z.infer<typeof briefItemSchema>;
+
+/**
+ * Build DynamoDB keys for a brief. The GSI partitions by brief status and
+ * sorts by zero-padded score, so "highest-scoring queued brief" is a single
+ * descending Query with Limit=1.
+ */
+export function briefToItem(brief: Brief): BriefItem {
+  const total = scoreTotal(brief.scores);
+  return {
+    ...brief,
+    pk: 'BRIEF',
+    sk: brief.briefId,
+    gsi1pk: `BRIEF#${brief.status}`,
+    // Pad so lexicographic order matches numeric order, then date-tiebreak.
+    gsi1sk: `${String(total).padStart(2, '0')}#${brief.researchedAt}`,
+  };
+}
+
+/**
+ * Decide what should happen with a scored brief.
+ *
+ * Auto-publishing is gated on evidence quality, not just the total: the real
+ * risk of unattended publishing is a misattributed statistic going out under
+ * James's name, which a high topic score does nothing to prevent.
+ */
+export function briefAction(brief: {
+  scores: Scores;
+  facts?: Fact[];
+  timeliness?: 'newsy' | 'evergreen';
+}): {
+  action: 'discard' | 'queue' | 'write' | 'write-and-publish';
+  total: number;
+  reasons: string[];
+} {
+  const total = scoreTotal(brief.scores);
+
+  const vetoed = VETO_CRITERIA.filter((key) => brief.scores[key] <= 2);
+  if (vetoed.length > 0) {
+    return {
+      action: 'discard',
+      total,
+      reasons: vetoed.map((key) => `${key} scored ${brief.scores[key]} (<=2 vetoes the topic)`),
+    };
+  }
+
+  if (total < WRITE_THRESHOLD) {
+    return {
+      action: 'queue',
+      total,
+      reasons: [`total ${total}/${SCORE_MAX} is below the write threshold of ${WRITE_THRESHOLD}`],
+    };
+  }
+
+  if (total < AUTOPUBLISH_THRESHOLD) {
+    return {
+      action: 'write',
+      total,
+      reasons: [`total ${total}/${SCORE_MAX} clears ${WRITE_THRESHOLD}; below auto-publish ${AUTOPUBLISH_THRESHOLD}`],
+    };
+  }
+
+  // Above the auto-publish score. Now the evidence has to be clean.
+  const facts = brief.facts ?? [];
+  const blockers: string[] = [];
+
+  if (facts.some((f) => f.conflicting)) {
+    blockers.push('a fact is marked CONFLICTING — needs a human to choose the framing');
+  }
+  if (facts.some((f) => !f.primarySource)) {
+    blockers.push('a fact is not traced to a primary source');
+  }
+  if (brief.scores.evidence < 5) {
+    blockers.push(`evidence scored ${brief.scores.evidence}/5 — auto-publish needs 5`);
+  }
+  if (brief.timeliness === 'newsy') {
+    // A newsy claim can be overtaken between research and publish.
+    blockers.push('newsy topics are reviewed before publishing');
+  }
+
+  if (blockers.length > 0) {
+    return { action: 'write', total, reasons: blockers };
+  }
+
+  return {
+    action: 'write-and-publish',
+    total,
+    reasons: [`total ${total}/${SCORE_MAX} with clean, primary-sourced evidence`],
+  };
+}
+
 /**
  * Structural checks that need the rendered body rather than the frontmatter.
  * Returns human-readable problems; empty means clean.
