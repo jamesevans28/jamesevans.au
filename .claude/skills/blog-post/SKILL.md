@@ -60,6 +60,47 @@ more out of it. They are **not** engineers.
 - **Australian English.** "organise", "recognise", "centre". Dates as
   "20 July 2026".
 - **Second person.** Address the reader as "you". James writes as "I".
+
+### Do not write like an AI
+
+This is a blog about AI, published under a real person's name. Prose that reads
+as machine-written undermines it more than a dull sentence would. James has
+called this out on a live post, so treat it as a hard requirement.
+
+**Never use:**
+
+- **Em dashes or en dashes** (— –). Use a comma, a full stop, brackets, or a
+  colon. A rewrite that cut 12 em dashes from a 1,100-word post is what
+  prompted this rule.
+- **The "not X, it's Y" flip** as a rhetorical device: *"The problem isn't the
+  cost. It's the culture."* Once in a piece is a coincidence; three times is a
+  signature. Just say the thing.
+- **Rule-of-three everywhere.** Triads in lists, in sentence rhythm, in section
+  counts. Real writing has twos and fives and sevens in it.
+- **Parallel bolded run-ins** — four sections that each open with a bolded
+  two-word phrase and run the same length. That symmetry is the loudest tell.
+- These words and phrases: delve, moreover, furthermore, landscape, realm,
+  leverage (as a verb), robust, seamless, game-changer, unlock, harness,
+  tapestry, testament, "navigate the", "it's worth noting", "in today's
+  fast-paced", "dive into", "let's explore".
+- A "## The short version" / "## Key takeaways" section that restates the
+  article. Land the ending in the last real section instead.
+
+**Do instead:**
+
+- **Let the structure be uneven.** Sections of genuinely different lengths. One
+  section can be three sentences; another can run six paragraphs. Not every
+  section needs the same internal shape.
+- **Vary paragraph length hard.** A ten-word paragraph next to a sixty-word one.
+  Check the spread before you ship: if every paragraph is 35–45 words, rewrite.
+- **Start some sentences with And, But, So.** Use contractions everywhere.
+- **Allow a sentence fragment** where it lands better than a full clause.
+- **Prefer the specific over the balanced.** "One example that stuck with me"
+  beats "a notable instance". First-person observation beats a survey of views.
+- **Let an aside sit in brackets** rather than reaching for a dash.
+
+Before pushing, read the draft back and ask: does any of this sound like it came
+out of a chatbot? Grep your own draft for `—` and for the banned words above.
 - Never invent credentials, clients, case studies, statistics, or quotes. If a
   claim needs a source and you don't have one, cut the claim.
 
@@ -194,6 +235,16 @@ npm run blog -- publish how-to-use-ai-to-write-better-emails
 Before showing James a draft, read the rendered page and check: the title and
 description read well as a search result, headings scan sensibly, no section is a
 wall of text, links work, and the reading time looks right for the depth.
+
+Then run the AI-prose check from "Do not write like an AI" over your own draft:
+
+```bash
+# Should return nothing
+grep -nE "—|–|delve|moreover|furthermore|leverage|seamless|robust|tapestry|it's worth noting|dive into" content-drafts/<slug>.md
+```
+
+Also eyeball the paragraph-length spread and the section shapes. Uniformity is
+the giveaway, and it does not show up in a grep.
 
 Publishing triggers a GitHub Actions deploy; the post is live at
 `https://jamesevans.au/blog/<slug>/` a couple of minutes later.
