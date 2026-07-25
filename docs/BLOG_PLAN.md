@@ -150,13 +150,22 @@ Add `{ label: 'Blog', href: '/blog' }` to `navLinks` in `src/content/site.ts` (d
 | **B2 — Site** | `/blog` + `/blog/[slug]`; markdown pipeline; prose theme; nav link; homepage teaser | Static build renders seeded posts; a11y + contrast green |
 | **B3 — SEO layer** | Metadata, JSON-LD, per-post OG images, sitemap entries, RSS | Rich Results test passes on a sample post; feed validates |
 | **B4 — Publish pipeline** | `scripts/blog/` CLI (draft/pull/push/publish/preview/list); `repository_dispatch` wiring; Claude skill | End-to-end: Claude drafts → preview → publish → live on jamesevans.au in one session |
-| **B5 — Later (optional)** | Tag pages (≥8 posts), related-posts block, newsletter capture, tiny admin UI if ever wanted | — |
+| **B5 — Later (optional)** | Tag pages (≥8 posts), related-posts block, newsletter capture, X/Twitter link-post on publish (see §10.3) | — |
 
 Rough effort: B1–B4 is one focused build session each, same shape as the original site phases.
 
-## 10. Open questions for James
+## 10. Decisions (confirmed by James, 25 July 2026)
 
-1. **Blog voice/scope** — engineering-leadership + AI topics (matches the site's positioning)? This decides the skill's house-style section.
-2. Comments — recommend **no** (spam surface, zero SEO value); readers can reply via /contact or LinkedIn.
-3. Should posts syndicate to LinkedIn/Medium with `canonicalUrl` pointing home? (Good traffic play; supported by the schema already.)
-4. Confirm the `gh` CLI + AWS SSO profile are set up on the authoring machine — both are assumed by the publish flow.
+1. **Blog voice/scope — "AI in everyday life."** The blog is for everyday people and small businesses, not engineers. Content pillars (these go verbatim into the authoring skill's house-style section):
+   - How everyday people can actually use AI — practical, jargon-free
+   - AI for small business and personal use
+   - Tips & tricks
+   - Step-by-step how-to guides
+   - Non-standard / creative ways of implementing AI
+   - Thoughts on the latest AI trends
+   - Commentary and takes on new AI innovations and ideas
+
+   **Tone:** plain-English, practical, opinionated where it's commentary — written for a smart non-technical reader. This is also great SEO territory: how-to and "can AI do X" queries have high search volume, and guide-style posts map cleanly to search intent. Tag taxonomy starts as: `guides`, `tips`, `small-business`, `personal`, `trends`, `commentary`.
+2. **Comments: no.** Readers reply via /contact.
+3. **Syndication: no LinkedIn. Twitter/X — maybe.** Plan for it as an optional B5 item: on publish, the CLI can post a link tweet (title + hook + URL) via the X API. Content always lives canonically on jamesevans.au — X only ever gets a link, never the full text. Not built until James says go; the schema's `canonicalUrl` field remains for any future syndication.
+4. **Tooling: confirmed** — `gh` CLI and AWS SSO profiles are set up on the authoring machine.
