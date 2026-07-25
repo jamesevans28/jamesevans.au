@@ -7,6 +7,8 @@ export interface DeployRoleStackProps extends cdk.StackProps {
   githubRepo: string;
   siteBucketArn: string;
   distributionArn: string;
+  /** Blog table, read at build time to prerender posts. */
+  blogTableArn: string;
 }
 
 /**
@@ -19,7 +21,7 @@ export class DeployRoleStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: DeployRoleStackProps) {
     super(scope, id, props);
 
-    const { githubRepo, siteBucketArn, distributionArn } = props;
+    const { githubRepo, siteBucketArn, distributionArn, blogTableArn } = props;
 
     // Reuse the account's existing GitHub OIDC provider if present, else
     // create one. GitHub's thumbprint is validated by AWS automatically for
@@ -60,6 +62,17 @@ export class DeployRoleStack extends cdk.Stack {
           's3:DeleteObject',
         ],
         resources: [siteBucketArn, `${siteBucketArn}/*`],
+      }),
+    );
+
+    // Read-only on the blog table: the build prerenders published posts.
+    // CI must never be able to write content — publishing is a local,
+    // credentialed action by James alone (docs/BLOG_PLAN.md §4).
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'ReadBlogContent',
+        actions: ['dynamodb:Query', 'dynamodb:GetItem', 'dynamodb:BatchGetItem'],
+        resources: [blogTableArn, `${blogTableArn}/index/*`],
       }),
     );
 

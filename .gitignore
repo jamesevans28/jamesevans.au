@@ -143,3 +143,9 @@ infra/cdk.out/
 infra/*.d.ts
 infra/*.js
 !infra/jest.config.js
+
+# Local blog drafts pulled from DynamoDB for editing (never deployed)
+content-drafts/
+
+# Per-post OG images, regenerated from post data by the prebuild step
+public/og/blog/

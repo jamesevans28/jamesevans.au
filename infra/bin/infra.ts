@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { EdgeStack } from '../lib/edge-stack.js';
 import { SiteStack } from '../lib/site-stack.js';
 import { DeployRoleStack } from '../lib/deploy-role-stack.js';
+import { BlogStack } from '../lib/blog-stack.js';
 
 const app = new cdk.App();
 
@@ -22,6 +23,8 @@ const githubRepo = app.node.tryGetContext('githubRepo') as string | undefined;
  *     its certificate in us-east-1 — this is the only thing forced out of
  *     Australia. Route 53 is a global service.
  *   - SiteStack (ap-southeast-2): S3 origin bucket + CloudFront + alias records.
+ *   - BlogStack (ap-southeast-2): DynamoDB table of blog posts, read at build
+ *     time to prerender /blog pages.
  *
  * crossRegionReferences lets the Sydney stack consume the us-east-1 cert/zone
  * without manual exports.
@@ -42,6 +45,13 @@ const site = new SiteStack(app, 'JamesEvansSite', {
 });
 site.addDependency(edge);
 
+// Blog content store. Independent of the site stack — content survives any
+// rebuild of the hosting layer.
+const blog = new BlogStack(app, 'JamesEvansBlog', {
+  env: { account, region: 'ap-southeast-2' },
+  domainName,
+});
+
 // OIDC deploy role for GitHub Actions (no long-lived keys). Deployed in the
 // Sydney region alongside the resources it manages.
 if (githubRepo) {
@@ -50,8 +60,10 @@ if (githubRepo) {
     githubRepo,
     siteBucketArn: site.bucketArn,
     distributionArn: site.distributionArn,
+    blogTableArn: blog.tableArn,
   });
   deployRole.addDependency(site);
+  deployRole.addDependency(blog);
 }
 
 app.synth();

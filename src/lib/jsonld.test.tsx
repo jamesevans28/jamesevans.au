@@ -4,8 +4,28 @@ import {
   personSchema,
   websiteSchema,
   professionalServiceSchema,
+  blogSchema,
+  blogPostingSchema,
+  breadcrumbSchema,
   JsonLd,
 } from './jsonld';
+import type { BlogPost } from './blog';
+
+function samplePost(overrides: Partial<BlogPost> = {}): BlogPost {
+  return {
+    slug: 'how-to-use-ai-for-email',
+    title: 'How to Use AI to Write Better Emails',
+    description: 'x'.repeat(150),
+    status: 'published',
+    publishedAt: '2026-07-20T09:00:00.000Z',
+    updatedAt: '2026-07-21T09:00:00.000Z',
+    tags: ['guides'],
+    bodyMarkdown: '## S\n\ntext',
+    words: 1200,
+    readingMinutes: 6,
+    ...overrides,
+  } as BlogPost;
+}
 
 describe('JSON-LD builders', () => {
   it('personSchema is a valid Person with sameAs to LinkedIn', () => {
@@ -35,6 +55,57 @@ describe('JSON-LD builders', () => {
   it('omits ABN identifier while none is set', () => {
     const s = professionalServiceSchema() as Record<string, unknown>;
     expect(s.identifier).toBeUndefined();
+  });
+});
+
+describe('blog JSON-LD', () => {
+  it('blogPostingSchema carries the fields Google uses for articles', () => {
+    const s = blogPostingSchema(samplePost());
+    expect(s['@type']).toBe('BlogPosting');
+    expect(s.headline).toBe('How to Use AI to Write Better Emails');
+    expect(s.url).toBe(
+      'https://jamesevans.au/blog/how-to-use-ai-for-email/',
+    );
+    expect(s.datePublished).toBe('2026-07-20T09:00:00.000Z');
+    expect(s.dateModified).toBe('2026-07-21T09:00:00.000Z');
+    expect(s.author.name).toBe('James Evans');
+    expect(s.wordCount).toBe(1200);
+    expect(s.inLanguage).toBe('en-AU');
+    expect(s.image).toContain('/og/blog/how-to-use-ai-for-email.png');
+  });
+
+  it('points mainEntityOfPage at a syndication canonical when one is set', () => {
+    const s = blogPostingSchema(
+      samplePost({ canonicalUrl: 'https://example.com/original/' }),
+    );
+    // The article may be syndicated, but the canonical wins for attribution.
+    expect(s.mainEntityOfPage['@id']).toBe('https://example.com/original/');
+    expect(s.url).toBe('https://jamesevans.au/blog/how-to-use-ai-for-email/');
+  });
+
+  it('falls back to publishedAt when a post has never been edited', () => {
+    const s = blogPostingSchema(samplePost({ updatedAt: undefined }));
+    expect(s.dateModified).toBe('2026-07-20T09:00:00.000Z');
+  });
+
+  it('blogSchema lists only published posts', () => {
+    const s = blogSchema([
+      samplePost(),
+      samplePost({ slug: 'a-draft', status: 'draft', publishedAt: undefined }),
+    ]);
+    expect(s['@type']).toBe('Blog');
+    expect(s.blogPost).toHaveLength(1);
+    expect(s.blogPost[0]?.url).toContain('how-to-use-ai-for-email');
+  });
+
+  it('breadcrumbSchema builds Home > Blog > post in order', () => {
+    const s = breadcrumbSchema(samplePost());
+    expect(s.itemListElement.map((i) => i.position)).toEqual([1, 2, 3]);
+    expect(s.itemListElement.map((i) => i.name)).toEqual([
+      'Home',
+      'Blog',
+      'How to Use AI to Write Better Emails',
+    ]);
   });
 });
 

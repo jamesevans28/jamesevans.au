@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/generate-blog-og.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -17,7 +18,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "og": "node scripts/generate-og.mjs",
-    "resume": "tsx scripts/generate-resume.mjs"
+    "og:blog": "node scripts/generate-blog-og.mjs --force",
+    "resume": "tsx scripts/generate-resume.mjs",
+    "blog": "tsx scripts/blog/index.ts"
   },
   "dependencies": {
     "@next/third-parties": "16.2.10",
@@ -26,6 +29,8 @@
     "react-dom": "19.2.7"
   },
   "devDependencies": {
+    "@aws-sdk/client-dynamodb": "3.1095.0",
+    "@aws-sdk/lib-dynamodb": "3.1095.0",
     "@eslint/js": "9.39.5",
     "@tailwindcss/postcss": "4.3.2",
     "@testing-library/jest-dom": "6.9.1",
@@ -38,16 +43,29 @@
     "@vitest/coverage-v8": "4.1.10",
     "eslint": "9.39.5",
     "eslint-config-next": "16.2.10",
+    "gray-matter": "4.0.3",
     "jsdom": "29.1.1",
     "pdfkit": "0.19.1",
     "prettier": "3.9.5",
     "prettier-plugin-tailwindcss": "0.8.0",
+    "reading-time": "1.5.0",
+    "rehype-autolink-headings": "7.1.0",
+    "rehype-pretty-code": "0.14.4",
+    "rehype-sanitize": "6.0.0",
+    "rehype-slug": "6.0.0",
+    "rehype-stringify": "10.0.1",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "remark-rehype": "11.1.2",
     "sharp": "0.35.3",
+    "shiki": "4.3.1",
     "tailwindcss": "4.3.2",
     "tsx": "4.23.1",
     "typescript": "6.0.3",
     "typescript-eslint": "8.64.0",
+    "unified": "11.0.5",
     "vitest": "4.1.10",
-    "vitest-axe": "0.1.0"
+    "vitest-axe": "0.1.0",
+    "zod": "4.4.3"
   }
 }

@@ -42,7 +42,7 @@ describe('hexToRgb', () => {
 describe.each([
   ['light', lightPalette],
   ['dark', darkPalette],
-] as const)('%s theme meets WCAG AA', (_name, p) => {
+] as const)('%s theme meets WCAG AA', (themeName, p) => {
   const normalTextPairs: Array<[string, string, string]> = [
     ['ink on paper', p.ink, p.paper],
     ['ink on surface', p.ink, p.surface],
@@ -55,6 +55,11 @@ describe.each([
     ['on-accent on citrus (marker)', p.onAccent, p.citrus],
     // Ghost button hover: paper text on a volt fill.
     ['paper on volt (ghost hover)', p.paper, p.volt],
+    // Article prose (.prose-volt in globals.css): body copy, links and the
+    // table header / code-block surface.
+    ['volt on paper (prose link)', p.volt, p.paper],
+    ['ink-muted on paper (prose body)', p.inkMuted, p.paper],
+    ['ink on surface (prose th / pre)', p.ink, p.surface],
   ];
 
   it.each(normalTextPairs)('%s ≥ 4.5:1', (_label, fg, bg) => {
@@ -63,5 +68,15 @@ describe.each([
 
   it('paper vs ink is a strong pairing (large UI) ≥ 3:1', () => {
     expect(contrastRatio(p.paper, p.ink)).toBeGreaterThanOrEqual(AA_LARGE);
+  });
+
+  it('flare is not usable as prose text on paper', () => {
+    // Documents why the prose link hover thickens the underline instead of
+    // recolouring to flare: it fails AA for normal text in the light theme.
+    // If this ever passes in BOTH themes, flare text becomes an option again.
+    const ratio = contrastRatio(p.flare, p.paper);
+    if (themeName === 'light') {
+      expect(ratio).toBeLessThan(AA_NORMAL);
+    }
   });
 });

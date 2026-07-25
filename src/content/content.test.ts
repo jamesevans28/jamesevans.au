@@ -14,6 +14,7 @@ describe('site content integrity', () => {
       '/services/',
       '/experience/',
       '/work/',
+      '/blog/',
       '/about/',
       '/contact/',
     ]);

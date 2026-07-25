@@ -54,6 +54,11 @@ jobs:
 
       - name: Build (static export)
         run: npm run build
+        env:
+          # CI has no AWS credentials and doesn't need them: this step verifies
+          # the build compiles and exports. Skipping the DynamoDB lookup avoids
+          # waiting on a credential chain that cannot resolve.
+          BLOG_SOURCE: local
 
       - name: Upload build output
         uses: actions/upload-artifact@v4

@@ -1,8 +1,36 @@
 # jamesevans.au — Blog Section Plan
 
 **Author:** Claude (planning session, 25 July 2026)
-**Status:** Proposed — not yet implemented
+**Status:** Phases B1–B4 built (25 July 2026). Not yet deployed — see "Before first deploy" below.
 **Depends on:** the existing site (see `docs/PLAN.md`, Phases 0–4 built)
+
+---
+
+## Build status (B1–B4 complete)
+
+Verified locally: **lint + typecheck + 156 tests + static export all green**, all four CDK stacks synthesize.
+
+- **B1** — `infra/lib/blog-stack.ts`: DynamoDB `jamesevans.au-blog` (on-demand, `by-status` GSI, PITR, deletion protection, RETAIN) in ap-southeast-2; deploy role granted read-only (`Query`/`GetItem`/`BatchGetItem`) on the table + indexes. Validation in `src/lib/blog-schema.ts` (zod), build-time data layer in `src/lib/blog.ts`. ✅
+- **B2** — `/blog` index + `/blog/[slug]` articles, markdown pipeline (`src/lib/markdown.ts`: remark/rehype + Shiki, sanitised), `.prose-volt` theme in `globals.css`, `PostCard`, on-page table of contents, related posts, Blog nav link. ✅
+- **B3** — Per-post `generateMetadata` (canonical, OpenGraph `article`, Twitter card), `BlogPosting` + `Blog` + `BreadcrumbList` JSON-LD, per-post OG images (`scripts/generate-blog-og.mjs`, wired to `prebuild`), sitemap entries with real `lastModified`, RSS at `/feed.xml`. ✅
+- **B4** — `scripts/blog/index.ts` CLI (`draft`/`pull`/`push`/`publish`/`unpublish`/`list`/`lint`/`preview`), `repository_dispatch: blog-publish` on the deploy workflow, authoring skill at `.claude/skills/blog-post/SKILL.md`. ✅
+
+### Decisions made during the build
+
+- **Draft isolation** is gated on `BLOG_INCLUDE_DRAFTS=1`, not `NODE_ENV`. `next build` always sets `NODE_ENV=production`, including the local preview build whose whole purpose is rendering a draft. The deploy workflow never sets the variable, so a draft cannot reach production.
+- **`generateStaticParams` emits a `__no-posts__` placeholder** when there are no posts: `output: export` fails a dynamic route that yields zero paths. The page calls `notFound()` for it, so the export contains only a `noindex` 404 at that URL, and it appears in no sitemap, feed, or index.
+- **AWS credentials are configured before the build step** in `deploy.yml`. They were previously configured after it; leaving that would have exported a blog with zero posts on every deploy instead of failing.
+- **An invalid *published* post fails the build**, rather than being skipped — silently dropping a live article is worse than a red deploy. Invalid *local drafts* only warn.
+- **Prose link hover thickens the underline instead of recolouring to flare.** Flare on paper is 3.31:1 in the light theme, below AA for normal text; `contrast.test.ts` now asserts this so it can't be reintroduced.
+- **`slugifyHeading` mirrors `github-slugger` exactly** — it replaces whitespace per character rather than collapsing runs, so `"AI & You"` → `ai--you`. Collapsing produced table-of-contents links pointing at ids the page didn't have; verified against the real library across 14 cases and locked in by a regression test.
+- **Build-time tooling lives in `devDependencies`.** The AWS SDK, unified/rehype stack and Shiki all run at build time only; nothing new ships to the browser (runtime deps are unchanged) and a rendered post adds zero client JS.
+
+### Before first deploy
+
+1. `cdk deploy JamesEvansBlog` (and re-deploy `JamesEvansDeployRole` for the new read grant).
+2. Set the `BLOG_TABLE` GitHub repo variable to `jamesevans.au-blog`.
+3. Grant James's local AWS profile read/write on the table (the CLI writes; CI never does).
+4. Write the first post: `npm run blog -- draft <slug>`, then follow the skill.
 
 ---
 

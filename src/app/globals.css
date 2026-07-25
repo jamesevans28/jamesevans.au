@@ -134,3 +134,191 @@
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
+
+/* ------------------------------------------------------------------ *
+ * Article prose — styles the HTML that src/lib/markdown.ts emits from
+ * a post body. Hand-rolled on Voltage tokens rather than pulled from
+ * @tailwindcss/typography: the token set is small, every colour here is
+ * contrast-checked (src/lib/contrast.test.ts), and this avoids shipping a
+ * plugin whose defaults we would override line by line anyway.
+ * ------------------------------------------------------------------ */
+.prose-volt {
+  color: var(--color-ink);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.prose-volt > * + * {
+  margin-top: 1.25em;
+}
+
+.prose-volt h2,
+.prose-volt h3 {
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  scroll-margin-top: 6rem; /* clears the sticky header on anchor jumps */
+}
+
+.prose-volt h2 {
+  margin-top: 2.25em;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.prose-volt h3 {
+  margin-top: 1.75em;
+  font-size: 1.3125rem;
+  font-weight: 700;
+}
+
+/* Heading anchors wrap the text (behavior: 'wrap'); keep them looking like
+   headings, and reveal the link affordance on hover/focus. */
+.prose-volt .heading-anchor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.prose-volt .heading-anchor:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-volt);
+  text-underline-offset: 0.2em;
+}
+
+.prose-volt p,
+.prose-volt li {
+  color: var(--color-ink-muted);
+}
+
+.prose-volt strong {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.prose-volt a:not(.heading-anchor) {
+  color: var(--color-volt);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 2px;
+}
+
+/* Hover thickens the underline rather than recolouring the link: flare on
+   paper is only 3.31:1 in the light theme, which fails AA for normal text
+   (see contrast.test.ts). Volt passes in both themes, so it stays put. */
+.prose-volt a:not(.heading-anchor):hover {
+  text-decoration-thickness: 3px;
+}
+
+.prose-volt ul,
+.prose-volt ol {
+  padding-left: 1.5rem;
+}
+
+.prose-volt ul {
+  list-style: disc;
+}
+
+.prose-volt ol {
+  list-style: decimal;
+}
+
+.prose-volt li + li {
+  margin-top: 0.5em;
+}
+
+.prose-volt li::marker {
+  color: var(--color-volt);
+}
+
+.prose-volt blockquote {
+  border-left: 4px solid var(--color-volt);
+  padding-left: 1.25rem;
+  font-size: 1.125rem;
+  font-style: italic;
+  color: var(--color-ink);
+}
+
+.prose-volt hr {
+  border-color: var(--color-line);
+  margin-block: 2.5em;
+}
+
+.prose-volt img {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-line);
+}
+
+/* Inline code (code NOT inside a highlighted pre block) */
+.prose-volt :not(pre) > code {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 0.3rem;
+  padding: 0.1em 0.35em;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--color-ink);
+}
+
+/* Fenced code blocks. rehype-pretty-code emits per-token
+   --shiki-light/--shiki-dark custom properties; pick one per theme. */
+.prose-volt figure[data-rehype-pretty-code-figure] {
+  margin-top: 1.5em;
+}
+
+.prose-volt pre {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.prose-volt pre code {
+  font-family: var(--font-mono);
+}
+
+.prose-volt pre span {
+  color: var(--shiki-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .prose-volt pre span {
+    color: var(--shiki-dark);
+  }
+}
+
+:root[data-theme='dark'] .prose-volt pre span {
+  color: var(--shiki-dark);
+}
+
+:root[data-theme='light'] .prose-volt pre span {
+  color: var(--shiki-light);
+}
+
+/* Tables (GFM) */
+.prose-volt table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose-volt th,
+.prose-volt td {
+  border: 1px solid var(--color-line);
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+}
+
+.prose-volt th {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.prose-volt td {
+  color: var(--color-ink-muted);
+}

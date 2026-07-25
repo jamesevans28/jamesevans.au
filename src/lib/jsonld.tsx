@@ -2,6 +2,8 @@ import { site } from '@/content/site';
 import { currentRole, skills } from '@/content/experience';
 import { services } from '@/content/services';
 import { aiOfferings } from '@/content/ai';
+import { blog } from '@/content/blog';
+import type { BlogPost } from '@/lib/blog';
 
 /**
  * JSON-LD structured data builders. Returned as plain objects and serialized
@@ -79,6 +81,75 @@ export function professionalServiceSchema() {
         })),
       ],
     },
+  };
+}
+
+/**
+ * Blog index. `blogPost` entries are references (headline + url) rather than
+ * full articles — the canonical BlogPosting lives on each post's own page.
+ */
+export function blogSchema(posts: BlogPost[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    name: `${blog.title} — ${site.name}`,
+    description: blog.description,
+    url: `${site.url}/blog/`,
+    inLanguage: 'en-AU',
+    author: { '@type': 'Person', name: site.name, url: site.url },
+    blogPost: posts
+      .filter((post) => post.status === 'published')
+      .map((post) => ({
+        '@type': 'BlogPosting',
+        headline: post.title,
+        url: `${site.url}/blog/${post.slug}/`,
+        datePublished: post.publishedAt,
+      })),
+  };
+}
+
+export function blogPostingSchema(post: BlogPost) {
+  const url = `${site.url}/blog/${post.slug}/`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.description,
+    // mainEntityOfPage tells Google which URL is authoritative for this article.
+    mainEntityOfPage: { '@type': 'WebPage', '@id': post.canonicalUrl ?? url },
+    url,
+    datePublished: post.publishedAt,
+    dateModified: post.updatedAt ?? post.publishedAt,
+    author: { '@type': 'Person', name: site.name, url: site.url },
+    publisher: { '@type': 'Person', name: site.name, url: site.url },
+    image: `${site.url}/og/blog/${post.slug}.png`,
+    keywords: post.tags.join(', '),
+    wordCount: post.words,
+    articleSection: post.tags[0],
+    inLanguage: 'en-AU',
+    isAccessibleForFree: true,
+  };
+}
+
+export function breadcrumbSchema(post: BlogPost) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${site.url}/` },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: blog.title,
+        item: `${site.url}/blog/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: post.title,
+        item: `${site.url}/blog/${post.slug}/`,
+      },
+    ],
   };
 }
 

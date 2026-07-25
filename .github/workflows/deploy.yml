@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Fired by `npm run blog -- publish <slug>`: blog content lives in DynamoDB,
+  # so publishing changes no files and needs an explicit rebuild to re-export
+  # the static pages (see docs/BLOG_PLAN.md §4).
+  repository_dispatch:
+    types: [blog-publish]
 
 # OIDC role assumption — no long-lived AWS keys in this repo.
 permissions:
@@ -62,17 +67,24 @@ jobs:
       - name: Unit tests
         run: npm test
 
-      - name: Build (static export)
-        run: npm run build
-        env:
-          # Baked into the static export at build time (client-side var).
-          NEXT_PUBLIC_GA_ID: ${{ vars.NEXT_PUBLIC_GA_ID }}
-
+      # Must precede the build: the build queries DynamoDB for published blog
+      # posts and prerenders them. Without credentials it would export a blog
+      # with no posts instead of failing.
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Build (static export)
+        run: npm run build
+        env:
+          # Baked into the static export at build time (client-side var).
+          NEXT_PUBLIC_GA_ID: ${{ vars.NEXT_PUBLIC_GA_ID }}
+          # Blog content source. BLOG_INCLUDE_DRAFTS is deliberately unset so a
+          # draft can never be exported to production.
+          BLOG_TABLE: ${{ vars.BLOG_TABLE }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
 
       - name: Sync hashed static assets (immutable cache)
         run: |
