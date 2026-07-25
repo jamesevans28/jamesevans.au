@@ -5,6 +5,7 @@ import { Container } from '@/components/Container';
 import { SparkField } from '@/components/SparkField';
 import { ButtonLink } from '@/components/Button';
 import { PostCard } from '@/components/PostCard';
+import { ShareButtons } from '@/components/ShareButtons';
 import { JsonLd, blogPostingSchema, breadcrumbSchema } from '@/lib/jsonld';
 import { getPost, getRenderablePosts } from '@/lib/blog';
 import { renderMarkdown, extractHeadings } from '@/lib/markdown';
@@ -160,7 +161,11 @@ export default async function BlogPostPage({
                 dangerouslySetInnerHTML={{ __html: html }}
               />
 
-              <aside className="mt-14 max-w-2xl rounded-[var(--radius-card)] border border-line border-t-[3px] border-t-flare bg-surface p-6">
+              <div className="mt-10 max-w-2xl border-t border-line pt-6">
+                <ShareButtons slug={post.slug} title={post.title} />
+              </div>
+
+              <aside className="mt-10 max-w-2xl rounded-[var(--radius-card)] border border-line border-t-[3px] border-t-flare bg-surface p-6">
                 <h2 className="font-display text-xl font-extrabold text-ink">
                   Want a hand putting this to work?
                 </h2>

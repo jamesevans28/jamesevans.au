@@ -6,6 +6,7 @@ import { Card } from './Card';
 import { Testimonials } from './Testimonials';
 import { ServicesGrid } from './ServicesGrid';
 import { PostCard } from './PostCard';
+import { ShareButtons } from './ShareButtons';
 import { renderMarkdown } from '@/lib/markdown';
 import type { BlogPost } from '@/lib/blog';
 
@@ -86,6 +87,13 @@ describe('accessibility (axe)', () => {
           } as BlogPost
         }
       />,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('ShareButtons has no violations', async () => {
+    const { container } = render(
+      <ShareButtons slug="a-post" title="A Post About Everyday AI" />,
     );
     expect(await axe(container)).toHaveNoViolations();
   });
