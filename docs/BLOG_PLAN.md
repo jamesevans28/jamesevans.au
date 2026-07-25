@@ -1,7 +1,7 @@
 # jamesevans.au — Blog Section Plan
 
 **Author:** Claude (planning session, 25 July 2026)
-**Status:** Phases B1–B4 + scheduled operation built and **deployed** (25 July 2026). Table live in ap-southeast-2; two briefs queued from a first research run.
+**Status:** **Live** (25 July 2026). Blog section deployed to jamesevans.au with the first post published; table live in ap-southeast-2.
 **Depends on:** the existing site (see `docs/PLAN.md`, Phases 0–4 built)
 
 ---
@@ -35,7 +35,11 @@ Done:
 3. ✅ `BLOG_TABLE=jamesevans.au-blog` set as a GitHub repo variable (`jamesevans28/jamesevans.au`), alongside the pre-existing `AWS_DEPLOY_ROLE_ARN`, `AWS_REGION`, `SITE_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`, `NEXT_PUBLIC_GA_ID`.
 4. ✅ First research run queued two briefs (see below).
 
-Remaining: write the first post (`blog-post` skill, or `npm run blog -- draft <slug>`). The site currently deploys with an empty blog, which is handled — the index shows its empty state and `/blog/[slug]` emits only a `noindex` 404 placeholder.
+5. ✅ Share controls added to post pages (X, LinkedIn, email, copy link, native share sheet where supported).
+6. ✅ Merged to `main` and deployed. CI + both Deploy runs green.
+7. ✅ First post published: [/blog/why-ai-sounds-so-sure-when-its-wrong/](https://jamesevans.au/blog/why-ai-sounds-so-sure-when-its-wrong/) — 1,095 words, `index, follow`, `BlogPosting` JSON-LD, in the sitemap and RSS feed.
+
+The `repository_dispatch` publish path is confirmed working end to end: `blog publish` fired a deploy that rebuilt and shipped the post without a code change.
 
 ### First research run (25 July 2026)
 
