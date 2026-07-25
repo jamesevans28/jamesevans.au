@@ -12,7 +12,7 @@ import { JsonLd, professionalServiceSchema } from '@/lib/jsonld';
 export const metadata: Metadata = {
   title: 'Services',
   description:
-    'AI adoption for business: assessments, workflow automation, and setting up Claude, OpenAI and Microsoft Copilot. Plus custom software, consulting and hands-on tech help in Melbourne and remote.',
+    'AI adoption for business: assessments, workflow automation, and setting up Claude, OpenAI and Copilot, plus custom software and hands-on tech help.',
   alternates: { canonical: '/services/' },
 };
 
@@ -20,24 +20,24 @@ export default function ServicesPage() {
   return (
     <>
       <JsonLd data={professionalServiceSchema()} />
-      <section className="relative overflow-hidden border-b border-line">
+      <section className="border-line relative overflow-hidden border-b">
         <SparkField density={26} seed={5} />
         <Container className="relative py-16 sm:py-20">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-volt">
+          <p className="text-volt text-xs font-bold tracking-[0.16em] uppercase">
             AI adoption
           </p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-extrabold text-ink sm:text-5xl">
+          <h1 className="text-ink mt-3 max-w-3xl text-4xl font-extrabold sm:text-5xl">
             {aiHeadline}
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">
+          <p className="text-ink-muted mt-5 max-w-2xl text-lg leading-relaxed">
             {aiIntro}
           </p>
           <ul className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-            <li className="text-xs font-bold uppercase tracking-widest text-ink-muted">
+            <li className="text-ink-muted text-xs font-bold tracking-widest uppercase">
               Working daily in
             </li>
             {aiTools.map((tool) => (
-              <li key={tool} className="font-semibold text-ink">
+              <li key={tool} className="text-ink font-semibold">
                 {tool}
               </li>
             ))}
@@ -52,26 +52,26 @@ export default function ServicesPage() {
             <li key={offering.slug}>
               <Card className="flex h-full flex-col gap-4">
                 <div>
-                  <span className="font-display text-2xl font-extrabold tabular-nums text-flare">
+                  <span className="font-display text-flare text-2xl font-extrabold tabular-nums">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <h2 className="mt-2 font-display text-xl font-extrabold text-ink">
+                  <h2 className="font-display text-ink mt-2 text-xl font-extrabold">
                     {offering.title}
                   </h2>
-                  <p className="mt-1 font-semibold text-volt">
+                  <p className="text-volt mt-1 font-semibold">
                     {offering.tagline}
                   </p>
                 </div>
-                <p className="text-sm leading-relaxed text-ink-muted">
+                <p className="text-ink-muted text-sm leading-relaxed">
                   {offering.description}
                 </p>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-ink-muted">
+                  <p className="text-ink-muted text-xs font-bold tracking-widest uppercase">
                     What you get
                   </p>
                   <ul className="mt-2 flex flex-col gap-1.5">
                     {offering.youGet.map((item) => (
-                      <li key={item} className="flex gap-2 text-sm text-ink">
+                      <li key={item} className="text-ink flex gap-2 text-sm">
                         <span aria-hidden="true" className="text-flare">
                           &#9656;
                         </span>
@@ -80,7 +80,7 @@ export default function ServicesPage() {
                     ))}
                   </ul>
                 </div>
-                <p className="mt-auto border-t border-line pt-4 text-sm text-ink">
+                <p className="border-line text-ink mt-auto border-t pt-4 text-sm">
                   {offering.outcome}
                 </p>
               </Card>
@@ -105,23 +105,23 @@ export default function ServicesPage() {
             <li key={service.slug}>
               <Card className="flex h-full flex-col gap-4">
                 <div>
-                  <h2 className="font-display text-2xl font-extrabold text-ink">
+                  <h2 className="font-display text-ink text-2xl font-extrabold">
                     {service.title}
                   </h2>
-                  <p className="mt-1 font-semibold text-volt">
+                  <p className="text-volt mt-1 font-semibold">
                     {service.tagline}
                   </p>
                 </div>
-                <p className="leading-relaxed text-ink-muted">
+                <p className="text-ink-muted leading-relaxed">
                   {service.description}
                 </p>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-ink-muted">
+                  <p className="text-ink-muted text-xs font-bold tracking-widest uppercase">
                     What you get
                   </p>
                   <ul className="mt-2 flex flex-col gap-1.5">
                     {service.youGet.map((item) => (
-                      <li key={item} className="flex gap-2 text-sm text-ink">
+                      <li key={item} className="text-ink flex gap-2 text-sm">
                         <span aria-hidden="true" className="text-flare">
                           ▸
                         </span>
@@ -130,8 +130,8 @@ export default function ServicesPage() {
                     ))}
                   </ul>
                 </div>
-                <p className="mt-auto border-t border-line pt-4 text-sm text-ink-muted">
-                  <span className="font-semibold text-ink">For: </span>
+                <p className="border-line text-ink-muted mt-auto border-t pt-4 text-sm">
+                  <span className="text-ink font-semibold">For: </span>
                   {service.forWho}
                 </p>
               </Card>
@@ -150,45 +150,45 @@ export default function ServicesPage() {
           {engagementSteps.map((step, i) => (
             <li
               key={step.title}
-              className="rounded-[var(--radius-card)] border border-line bg-paper p-6"
+              className="border-line bg-paper rounded-[var(--radius-card)] border p-6"
             >
-              <span className="font-display text-3xl font-extrabold text-flare tabular-nums">
+              <span className="font-display text-flare text-3xl font-extrabold tabular-nums">
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <h3 className="mt-2 font-display text-lg font-bold text-ink">
+              <h3 className="font-display text-ink mt-2 text-lg font-bold">
                 {step.title}
               </h3>
-              <p className="mt-1 text-sm leading-relaxed text-ink-muted">
+              <p className="text-ink-muted mt-1 text-sm leading-relaxed">
                 {step.body}
               </p>
             </li>
           ))}
         </ol>
-        <p className="mt-8 text-sm text-ink-muted">
-          <span className="font-semibold text-ink">Where: </span>
+        <p className="text-ink-muted mt-8 text-sm">
+          <span className="text-ink font-semibold">Where: </span>
           {serviceArea}
         </p>
       </Section>
 
       <Section>
-        <div className="rounded-[var(--radius-card)] border-2 border-volt p-8 text-center sm:p-12">
-          <h2 className="text-3xl font-extrabold text-ink">
+        <div className="border-volt rounded-[var(--radius-card)] border-2 p-8 text-center sm:p-12">
+          <h2 className="text-ink text-3xl font-extrabold">
             Tell me what you need.
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-ink-muted">
-            No obligation, just a straight conversation about whether I can
-            help and what it would take.
+          <p className="text-ink-muted mx-auto mt-3 max-w-xl">
+            No obligation, just a straight conversation about whether I can help
+            and what it would take.
           </p>
           <div className="mt-6 flex justify-center">
             <ButtonLink href="/contact/" variant="primary">
               Start a conversation
             </ButtonLink>
           </div>
-          <p className="mt-4 text-sm text-ink-muted">
+          <p className="text-ink-muted mt-4 text-sm">
             Or email{' '}
             <a
               href={`mailto:${site.email}`}
-              className="font-semibold text-volt hover:underline"
+              className="text-volt font-semibold hover:underline"
             >
               {site.email}
             </a>

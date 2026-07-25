@@ -20,13 +20,13 @@ export function PostCard({
       <Link
         href={`/blog/${post.slug}/`}
         className={cn(
-          'group flex h-full flex-col rounded-[var(--radius-card)] border border-line border-t-[3px] border-t-volt bg-surface p-6',
+          'group border-line border-t-volt bg-surface flex h-full flex-col rounded-[var(--radius-card)] border border-t-[3px] p-6',
           'transition-transform hover:-translate-y-1',
         )}
       >
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
+        <div className="text-ink-muted flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
           {post.status === 'draft' ? (
-            <span className="rounded-full bg-citrus px-2 py-0.5 font-bold uppercase tracking-wide text-on-accent">
+            <span className="bg-citrus text-on-accent rounded-full px-2 py-0.5 font-bold tracking-wide uppercase">
               Draft
             </span>
           ) : null}
@@ -39,11 +39,11 @@ export function PostCard({
           <span>{post.readingMinutes} min read</span>
         </div>
 
-        <h3 className="mt-3 font-display text-xl font-extrabold text-ink group-hover:text-volt">
+        <h2 className="font-display text-ink group-hover:text-volt mt-3 text-xl font-extrabold">
           {post.title}
-        </h3>
+        </h2>
 
-        <p className="mt-2 flex-1 leading-relaxed text-ink-muted">
+        <p className="text-ink-muted mt-2 flex-1 leading-relaxed">
           {post.description}
         </p>
 
@@ -51,7 +51,7 @@ export function PostCard({
           {post.tags.map((tag) => (
             <li
               key={tag}
-              className="rounded-full border border-line px-2.5 py-0.5 text-xs font-medium text-ink-muted"
+              className="border-line text-ink-muted rounded-full border px-2.5 py-0.5 text-xs font-medium"
             >
               {tag}
             </li>

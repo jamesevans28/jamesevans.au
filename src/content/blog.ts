@@ -12,7 +12,7 @@ export const blog = {
   title: 'Blog',
   heading: 'AI, in plain English.',
   description:
-    'Practical writing about using AI in everyday life and small business: how-to guides, tips and tricks, creative uses, and honest takes on the latest AI tools and trends.',
+    'Practical, jargon-free writing about using AI in everyday life and small business: guides, tips, and honest takes on the latest tools and trends.',
   intro:
     'Practical, jargon-free writing about actually using AI: guides you can follow, tips worth stealing, unusual ways to put it to work, and honest takes on what the latest tools are really good for.',
   emptyState:

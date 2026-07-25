@@ -18,7 +18,7 @@ export const site = {
   intro:
     "Twenty-five years building software and leading the teams that build it, now including the technology behind Australia Post's Point of Sale in around 4,000 stores. I design and ship real products, and I help businesses adopt AI in a way that actually sticks. Two things I do well, and they make each other better.",
   description:
-    'James Evans is a Melbourne software engineering leader with 25 years of experience. Custom web and mobile apps, engineering leadership, and practical AI adoption: assessments, workflow automation, and setting up Claude, OpenAI and Microsoft Copilot.',
+    'Melbourne software engineering leader with 25 years of experience: web and mobile apps, engineering leadership, and practical AI adoption for business.',
 } as const;
 
 export const navLinks = [

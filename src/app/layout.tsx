@@ -11,7 +11,7 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name}: Software engineering, AI adoption and tech help in Melbourne`,
+    default: `${site.name}: Software engineering and AI adoption`,
     template: `%s | ${site.name}`,
   },
   description: site.description,
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
     locale: 'en_AU',
     url: site.url,
     siteName: site.name,
-    title: `${site.name}: Software engineering, AI adoption and tech help`,
+    title: `${site.name}: Software engineering and AI adoption`,
     description: site.description,
     images: [{ url: '/og.png', width: 1200, height: 630, alt: site.name }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${site.name}: Software engineering, AI adoption and tech help`,
+    title: `${site.name}: Software engineering and AI adoption`,
     description: site.description,
     images: ['/og.png'],
   },
@@ -62,7 +62,7 @@ export default function RootLayout({
       <body>
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-volt focus:px-4 focus:py-2 focus:text-paper"
+          className="focus:bg-volt focus:text-paper sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:px-4 focus:py-2"
         >
           Skip to content
         </a>
