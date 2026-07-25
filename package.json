@@ -19,6 +19,7 @@
     "format:check": "prettier --check .",
     "og": "node scripts/generate-og.mjs",
     "og:blog": "node scripts/generate-blog-og.mjs --force",
+    "favicon": "node scripts/generate-favicon.mjs",
     "resume": "tsx scripts/generate-resume.mjs",
     "blog": "tsx scripts/blog/index.ts"
   },
