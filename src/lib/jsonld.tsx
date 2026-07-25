@@ -92,7 +92,7 @@ export function blogSchema(posts: BlogPost[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    name: `${blog.title} — ${site.name}`,
+    name: `${blog.title} | ${site.name}`,
     description: blog.description,
     url: `${site.url}/blog/`,
     inLanguage: 'en-AU',

@@ -328,6 +328,12 @@ Before showing James a draft, read the rendered page and check: the title and
 description read well as a search result, headings scan sensibly, no section is a
 wall of text, links work, and the reading time looks right for the depth.
 
+Note that page furniture is guarded automatically: `src/content/prose-style.test.ts`
+fails the build on an em or en dash anywhere in reader-facing copy under
+`src/app`, `src/components` or `src/content`. That test exists because a dash
+survived to production in the article CTA, which no post-body grep would ever
+have caught. Post bodies still need the manual check below.
+
 Then run the AI-prose check from "Do not write like an AI" over your own draft:
 
 ```bash

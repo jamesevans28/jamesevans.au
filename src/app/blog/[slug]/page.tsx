@@ -114,7 +114,7 @@ export default async function BlogPostPage({
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-ink-muted">
               {post.status === 'draft' ? (
                 <span className="rounded-full bg-citrus px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-accent">
-                  Draft — not published
+                  Draft, not published
                 </span>
               ) : null}
               {post.publishedAt ? (
@@ -171,7 +171,7 @@ export default async function BlogPostPage({
                 </h2>
                 <p className="mt-2 leading-relaxed text-ink-muted">
                   I help businesses and individuals adopt AI in a way that
-                  actually sticks — assessments, practical training, and setting
+                  actually sticks. Assessments, practical training, and setting
                   the tools up properly.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
