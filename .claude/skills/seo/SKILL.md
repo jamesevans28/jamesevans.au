@@ -7,8 +7,9 @@ description: Monitor and improve search performance for jamesevans.au — Google
 
 The goal is compounding organic growth for a personal site with a blog
 ("AI, in plain English"), with **Australia as the priority market**. This
-skill has three jobs: **watch** (GA4 + Search Console trends), **diagnose**
-(technical and GEO audits), and **act** (concrete fixes, applied in the repo).
+skill has four jobs: **watch** (GA4, Search Console, Bing), **diagnose**
+(technical and GEO audits), **act** (fixes committed to the repo, indexing
+pushes), and **escalate** (GitHub issues for anything functional).
 
 **Data comes from the CLI, never from memory.** Everything flows through
 `npm run seo -- <command>` — GA4, Search Console, PageSpeed, Bing, IndexNow,
@@ -19,10 +20,65 @@ rather than guessing at causes or reconstructing setup from scratch.
 
 Reference material in this skill's directory:
 
+- `reference/growth-levers.md` — **read this when deciding what to do.** What
+  actually drives visitors, ranked by leverage, plus what to stop wasting
+  runs on and how to diagnose which stage the site is at
 - `reference/geo-audit.md` — the GEO rubric (run it per page, in full)
 - `reference/api-cheatsheet.md` — GA4 dimensions/metrics, GSC details,
   Bing and IndexNow specifics, Admin API paths, quotas, auth model, and all
   numeric thresholds
+
+## The mandate
+
+James's instruction (25 Jul 2026): **act as an SEO expert whose job is to
+drive visitors to the site, and grow them day on day.** He expects the agent
+to be taking care of traffic and engagement without being asked, and to
+speak up when it needs something.
+
+So the weekly run is not a report-writing exercise. It is: find the largest
+current constraint on traffic, fix what you're allowed to fix, and escalate
+what you aren't. A run that produces a tidy report and changes nothing is a
+failed run — unless the honest finding is that the site is healthy and the
+constraint is simply time (early on, it often is; say so plainly).
+
+### What you may change on your own authority
+
+**SEO behaviour, non-functional** — commit straight to main:
+
+- Titles, meta descriptions, OG/Twitter metadata, canonical correctness.
+- Heading structure and hierarchy fixes.
+- Internal links and anchor text; adding links between existing pages.
+- Structured data (JSON-LD) additions and corrections.
+- Image alt text; `sitemap.xml` and `robots.txt` corrections.
+- Copy edits that improve answer-first structure or AU relevance, within
+  the `blog-post` voice rules.
+- Sitemap and IndexNow submissions; additive GA4 config (see the GA
+  management mode).
+
+**Functional changes — do NOT make them. Open a GitHub issue instead**
+(see below): anything touching components, routing, build config,
+dependencies, layout, or behaviour. If a fix needs new UI, a new page
+template, a config change, or a dependency, it is functional — even when
+the motivation is purely SEO.
+
+Grey areas resolve toward the issue. A canonical tag correction is
+behavioural if it changes which URL resolves; a title change never is.
+
+### Raising GitHub issues
+
+Repo `jamesevans28/jamesevans.au`, via `gh issue create`. One issue per
+problem, and include enough that James can decide without re-deriving it:
+
+- **What** the change is, concretely.
+- **Why it drives traffic** — the mechanism, not a vague appeal to "SEO".
+- **The evidence**: the CLI output, metric, or audit finding behind it,
+  with numbers.
+- **Expected impact** and how you'd measure it, honestly — including when
+  the effect is likely small or unmeasurable at current traffic.
+- **What you'd do** if approved, and the risk.
+
+Label `enhancement` (or `bug` for something broken). Check open issues
+first — never file a duplicate; comment on the existing one instead.
 
 ## Non-negotiables
 
@@ -35,10 +91,11 @@ Reference material in this skill's directory:
   changes (deleting/archiving anything, changing data filters, editing
   streams, touching Consent settings) require James's explicit go-ahead
   in this conversation, every time.**
-- **Fixes land as code, not opinions.** A finding worth reporting is worth
-  a diff. Small, safe fixes (a long title, a missing alt) — apply directly.
-  Structural changes (URL/canonical changes, robots rules, removing pages)
-  — propose first. Never change a published post's URL.
+- **Fixes land as code, not opinions.** A finding worth reporting is worth a
+  diff or an issue — never a note that quietly recurs every week. Which of
+  the two is decided by the authority split in The mandate above.
+  **Never change a published post's URL**, whatever the SEO argument: it
+  breaks inbound links and loses the ranking history the URL has accrued.
 - **Honest severity.** The audit is only useful if a quiet report means
   the site is genuinely healthy. Don't pad reports with non-issues to look
   thorough; "no action needed" is a valid conclusion.
@@ -55,32 +112,69 @@ Reference material in this skill's directory:
 Pick the mode from what James asked; run "weekly review" when scheduled or
 when the ask is general ("how's the site doing?").
 
-### 1. Weekly review (default / scheduled)
+### 1. Weekly growth run (default / scheduled)
 
-The recurring health check. Runs unattended — never ask questions; state
-assumptions and continue.
+The main event, and the one that runs unattended every week. **Never ask
+questions mid-run** — infer, state assumptions, act, and put anything that
+genuinely needs James in the report or a GitHub issue.
 
-1. `npm run seo -- snapshot --days 28` — GA + GSC combined view.
-2. `npm run seo -- ga trends --days 28` — is traffic growing?
-3. `npm run seo -- gsc queries --days 28 --country AUS` — AU search reality.
-4. `npm run build && npm run seo -- audit` — regression check on the export.
-5. **Indexing check** — `gsc sitemaps` (submitted, current, error-free) plus
-   `gsc inspect` on any post published since the last report. A page Google
-   has never crawled earns nothing, and no other report surfaces this: on
-   25 Jul 2026 the entire blog was "unknown to Google" while every other
-   signal looked healthy. If a post is unknown more than ~a week after the
-   sitemap listed it, investigate — don't just resubmit.
-6. Compare against the previous report in `docs/seo/` (see Reports below).
+**Step 1 — Measure, and compare.** Read the latest `docs/seo/` report first
+so you have a baseline; without it "traffic is up" is meaningless.
 
-Deliverable: a report answering five questions — traffic direction, which
-pages/posts win and lose on engagement, what Australia searches to find us,
-striking-distance opportunities (position 4–15, sorted by impressions),
-and any new technical findings. End with ≤3 prioritised actions, each with
-its grounding evidence. Apply the safe ones in the same run.
+```bash
+npm run seo -- snapshot --days 28
+npm run seo -- ga trends --days 28
+npm run seo -- ga geo --days 28
+npm run seo -- gsc queries --days 28 --country AUS
+```
 
-While traffic is this low, weight the technical and indexing findings over
-the analytics ones — they're the parts that are actually actionable, and the
-engagement numbers won't mean much for a while yet.
+**Step 2 — Check discovery.** The failure mode that silently costs the most,
+because every other signal can look fine while it's happening.
+
+```bash
+npm run seo -- gsc sitemaps
+npm run seo -- gsc inspect <each URL published since the last run>
+npm run seo -- bing traffic
+```
+
+If a page is unknown to Google or uncrawled by Bing more than ~a week after
+the sitemap listed it, that is the week's priority — investigate the cause,
+don't just resubmit. Push anything new to IndexNow.
+
+**Step 3 — Audit the build.** `npm run build && npm run seo -- audit`.
+Regressions here are cheap to fix and compound, so fix them now.
+
+**Step 4 — Diagnose the constraint.** Name the single biggest thing limiting
+traffic this week, and say why. Typical progression for a new site:
+not indexed → indexed but no impressions (no rankings) → impressions but no
+clicks (title/meta/CTR) → clicks but no engagement (content) → growth.
+Work the current stage; don't optimise CTR on a page with no impressions.
+
+**Step 5 — Act.** Fix everything in your authority (see The mandate above),
+commit, and merge. Open GitHub issues for functional changes. Then verify
+what you changed actually deployed.
+
+**Step 6 — Feed the content engine.** The biggest lever on traffic for a site
+this small is _more posts on things people actually search_ — which belongs to
+`blog-research` and `blog-post`, not here. This skill's contribution is real
+query data instead of guessed topics. From `gsc queries`, extract: queries
+where we get impressions but rank poorly (nearly relevant — a dedicated post
+would likely rank), query themes with no matching page (content gaps), and
+exact phrasings for H2s. Put these in the report as a handoff note.
+
+**Step 7 — Report.** Write `docs/seo/YYYY-MM-DD-weekly.md` covering: the
+numbers vs last week, the constraint you identified, **what you changed**,
+what you filed as issues, the content handoff from step 6, and what you'll
+watch next week. Commit it with the fixes.
+
+**Step 8 — Escalate, if needed.** If you are blocked on something only James
+can do, or you need a decision, lead the run summary with it. Don't bury it.
+
+Two calibration notes. While traffic is small, weight indexing and technical
+findings above analytics — they are what's actually actionable, and per-page
+engagement differences are noise (see Respect small numbers). And organic
+growth is not linear: a flat week is not a failure, but three flat weeks with
+no changes shipped is.
 
 ### 2. Technical audit
 

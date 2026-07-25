@@ -66,20 +66,35 @@ export function serviceAccountEmail(): string {
 }
 
 function readKey(): KeyFile {
+  // SEO_SA_KEY carries the whole key JSON in an env var, for environments with
+  // no home directory to read from — cloud routine runs, CI. Accepts raw JSON
+  // or base64, since secret stores mangle multi-line values differently.
+  const inline = process.env.SEO_SA_KEY;
+  if (inline) {
+    const text = inline.trimStart().startsWith('{')
+      ? inline
+      : Buffer.from(inline, 'base64').toString('utf8');
+    return validateKey(JSON.parse(text) as KeyFile, 'SEO_SA_KEY');
+  }
   if (!existsSync(KEY_FILE)) {
     throw new Error(
-      `No service-account key at ${KEY_FILE}.\n` +
-        'Create one (personal project, nothing to do with client work):\n' +
+      `No service-account key at ${KEY_FILE}, and SEO_SA_KEY is unset.\n` +
+        'Locally, create one (personal project, nothing to do with client work):\n' +
         `  gcloud iam service-accounts keys create ${KEY_FILE} \\\n` +
         `    --iam-account=seo-agent@${QUOTA_PROJECT}.iam.gserviceaccount.com --project=${QUOTA_PROJECT}\n` +
-        'Or point SEO_KEY_FILE at an existing key.',
+        'Or point SEO_KEY_FILE at an existing key. In a cloud/CI run, set ' +
+        'SEO_SA_KEY to the key JSON (raw or base64).',
     );
   }
-  const key = JSON.parse(readFileSync(KEY_FILE, 'utf8')) as KeyFile;
+  return validateKey(
+    JSON.parse(readFileSync(KEY_FILE, 'utf8')) as KeyFile,
+    KEY_FILE,
+  );
+}
+
+function validateKey(key: KeyFile, source: string): KeyFile {
   if (!key.client_email || !key.private_key) {
-    throw new Error(
-      `${KEY_FILE} is not a valid service-account key JSON file.`,
-    );
+    throw new Error(`${source} is not a valid service-account key JSON file.`);
   }
   return key;
 }
