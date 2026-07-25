@@ -8,7 +8,6 @@ export function SiteFooter() {
         <div>
           <p className="font-display text-lg font-extrabold tracking-tight text-ink">
             {site.name}
-            <span className="text-flare">.</span>
           </p>
           <p className="mt-2 max-w-xs text-sm text-ink-muted">{site.intro}</p>
         </div>

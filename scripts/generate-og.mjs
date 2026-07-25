@@ -53,7 +53,7 @@ const svg = `
   <text x="90" y="150" font-family="Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="4" fill="#7c89ff">JAMES EVANS · MELBOURNE</text>
   <text x="86" y="300" font-family="Georgia, 'Times New Roman', serif" font-size="86" font-weight="800" fill="#f2f2fa">Making</text>
   <text x="86" y="390" font-family="Georgia, 'Times New Roman', serif" font-size="86" font-weight="800" fill="#f2f2fa">technology</text>
-  <text x="86" y="480" font-family="Georgia, 'Times New Roman', serif" font-size="86" font-weight="800" fill="#7c89ff">work<tspan fill="#ff4d2e">.</tspan></text>
+  <text x="86" y="480" font-family="Georgia, 'Times New Roman', serif" font-size="86" font-weight="800" fill="#7c89ff">work.</text>
 
   <text x="90" y="560" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#9c9cb8">Software · apps · advice · tech help</text>
 </svg>

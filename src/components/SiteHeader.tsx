@@ -17,7 +17,6 @@ export function SiteHeader() {
           className="font-display text-lg font-extrabold tracking-tight text-ink"
         >
           {site.name}
-          <span className="text-flare">.</span>
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-7 md:flex">
