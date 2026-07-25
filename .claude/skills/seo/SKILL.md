@@ -1,6 +1,6 @@
 ---
 name: seo
-description: Monitor and improve search performance for jamesevans.au — Google Analytics 4 and Search Console monitoring, page/post engagement trends, technical on-page audits (titles, metas, headings, canonicals, internal links, Core Web Vitals), GEO audits (how citable the content is for AI systems like Claude, ChatGPT, and Perplexity), and growing Australian organic traffic. Use when James asks about SEO, traffic, rankings, analytics, search performance, why a page isn't ranking, AI-search visibility, or wants an audit or weekly review.
+description: Monitor and improve search performance for jamesevans.au — Google Analytics 4, Search Console, and Bing Webmaster monitoring, page/post engagement trends, technical on-page audits (titles, metas, headings, canonicals, internal linking, Core Web Vitals, crawlability), GEO audits (how citable the content is for AI systems like Claude, ChatGPT, and Perplexity), getting new posts indexed, and growing Australian organic traffic. Use when James asks about SEO, traffic, rankings, analytics, search performance, indexing, why a page isn't ranking or being found, AI-search visibility, or wants an audit or weekly review.
 ---
 
 # SEO for jamesevans.au
@@ -10,18 +10,19 @@ The goal is compounding organic growth for a personal site with a blog
 skill has three jobs: **watch** (GA4 + Search Console trends), **diagnose**
 (technical and GEO audits), and **act** (concrete fixes, applied in the repo).
 
-**Data comes from the CLI, never from memory.** All Google data flows
-through `npm run seo -- <command>` (see `scripts/seo/index.ts` header for
-the full command list). Never invent or extrapolate a metric — if a number
-isn't in CLI output, say so. If the CLI reports scope errors, stop and give
-James the remediation commands it prints (they're interactive; only he can
-run them).
+**Data comes from the CLI, never from memory.** Everything flows through
+`npm run seo -- <command>` — GA4, Search Console, PageSpeed, Bing, IndexNow,
+and the static audit (see `scripts/seo/index.ts` header for the full command
+list). Never invent or extrapolate a metric; if a number isn't in CLI output,
+say so. When a command fails it prints specific remediation — relay that
+rather than guessing at causes or reconstructing setup from scratch.
 
 Reference material in this skill's directory:
 
 - `reference/geo-audit.md` — the GEO rubric (run it per page, in full)
 - `reference/api-cheatsheet.md` — GA4 dimensions/metrics, GSC details,
-  Admin API paths, quotas, and all numeric thresholds
+  Bing and IndexNow specifics, Admin API paths, quotas, auth model, and all
+  numeric thresholds
 
 ## Non-negotiables
 
