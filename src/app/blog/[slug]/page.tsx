@@ -66,6 +66,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
+      site: site.xHandle,
+      creator: site.xHandle,
       title: post.title,
       description: post.description,
       images: [ogImage],

@@ -28,11 +28,12 @@ function samplePost(overrides: Partial<BlogPost> = {}): BlogPost {
 }
 
 describe('JSON-LD builders', () => {
-  it('personSchema is a valid Person with sameAs to LinkedIn', () => {
+  it('personSchema is a valid Person with sameAs to LinkedIn and X', () => {
     const p = personSchema();
     expect(p['@type']).toBe('Person');
     expect(p.name).toBe('James Evans');
     expect(p.sameAs).toContain('https://www.linkedin.com/in/-jamesevans/');
+    expect(p.sameAs).toContain('https://x.com/jjme28');
     expect(p.worksFor.name).toBe('Australia Post');
     expect(Array.isArray(p.knowsAbout)).toBe(true);
   });

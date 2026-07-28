@@ -59,6 +59,23 @@ export default function ContactPage() {
                 For professional networking and roles.
               </p>
             </a>
+
+            <a
+              href={site.x}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group rounded-[var(--radius-card)] border border-line border-t-[3px] border-t-volt bg-surface p-6 transition-transform hover:-translate-y-1"
+            >
+              <p className="text-xs font-bold uppercase tracking-widest text-ink-muted">
+                X
+              </p>
+              <p className="mt-2 font-display text-lg font-bold text-volt group-hover:underline">
+                {site.xHandle}
+              </p>
+              <p className="mt-1 text-sm text-ink-muted">
+                Shorter thoughts on AI, and new posts when they go up.
+              </p>
+            </a>
           </div>
 
           <p className="mt-10 text-sm text-ink-muted">

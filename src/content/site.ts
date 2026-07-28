@@ -14,6 +14,8 @@ export const site = {
   // Primary domain mailbox (Fastmail); the personal Gmail is never published.
   email: 'me@jamesevans.au',
   linkedin: 'https://www.linkedin.com/in/-jamesevans/',
+  x: 'https://x.com/jjme28',
+  xHandle: '@jjme28',
   tagline: 'Software engineering and AI adoption, done properly.',
   intro:
     "Twenty-five years building software and leading the teams that build it, now including the technology behind Australia Post's Point of Sale in around 4,000 stores. I design and ship real products, and I help businesses adopt AI in a way that actually sticks. Two things I do well, and they make each other better.",

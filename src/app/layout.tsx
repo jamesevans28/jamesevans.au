@@ -30,6 +30,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    site: site.xHandle,
+    creator: site.xHandle,
     title: `${site.name}: Software engineering and AI adoption`,
     description: site.description,
     images: ['/og.png'],

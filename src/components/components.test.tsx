@@ -34,7 +34,7 @@ vi.mock('next/image', () => ({
 }));
 
 describe('SiteFooter', () => {
-  it('shows the email, LinkedIn and current-year copyright', () => {
+  it('shows the email, LinkedIn, X and current-year copyright', () => {
     render(<SiteFooter />);
     expect(
       screen.getByRole('link', { name: site.email }),
@@ -42,6 +42,10 @@ describe('SiteFooter', () => {
     expect(screen.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute(
       'href',
       site.linkedin,
+    );
+    expect(screen.getByRole('link', { name: 'X' })).toHaveAttribute(
+      'href',
+      site.x,
     );
     expect(
       screen.getByText(new RegExp(String(new Date().getFullYear()))),

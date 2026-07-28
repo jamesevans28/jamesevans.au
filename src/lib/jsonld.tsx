@@ -30,7 +30,7 @@ export function personSchema() {
       addressCountry: 'AU',
     },
     knowsAbout: [...skills],
-    sameAs: [site.linkedin],
+    sameAs: [site.linkedin, site.x],
   };
 }
 

@@ -53,6 +53,16 @@ export function SiteFooter() {
                 LinkedIn
               </a>
             </li>
+            <li>
+              <a
+                href={site.x}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-ink transition-colors hover:text-volt"
+              >
+                X
+              </a>
+            </li>
           </ul>
         </div>
       </div>
